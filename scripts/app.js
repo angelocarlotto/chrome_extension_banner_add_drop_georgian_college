@@ -3,7 +3,7 @@ document.getElementsByClassName("pageheaderlinks")[0].append("|  ");
 document
   .getElementsByClassName("pageheaderlinks")[0]
   .appendChild(btnLoadJQuery);
-btnLoadJQuery.innerText = "Open Amazin Search PopUp 🥳";
+btnLoadJQuery.innerText = "🔎COURSES SEARCH++🚀";
 
 var calendar = null;
 var calendarEl = null;
@@ -59,14 +59,14 @@ const triggerEvent = (el, eventType, detail) =>
 
 selectCourse.addEventListener("change", function (e) {
   console.log($(e.target).find(":selected").val());
-  let search="";
+  let search = "";
   $(e.target)
     .find(":selected")
     .each((l, e) => {
-      let obj=JSON.parse(e.dataset.obj);
-      search+=`"${obj.location2}.*${obj.subj}.*${obj.crse}" `;
+      let obj = JSON.parse(e.dataset.obj);
+      search += `"${obj.location2}.*${obj.subj}.*${obj.crse}" `;
     });
-  txtFilterSelect.value =search;// $(e.target).val().join(" ");
+  txtFilterSelect.value = search; // $(e.target).val().join(" ");
   triggerEvent(txtFilterSelect, "keydown", { doNotChangeSelect: true });
 });
 
@@ -93,12 +93,19 @@ txtFilterSelect.addEventListener("keydown", function (e) {
       regex.test(ee.title2.toLowerCase())
     );
     if (!e.detail?.doNotChangeSelect) {
-
       let coursesItemsArray = Array.from(filterData);
-  var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
-    return i == sites.map((l,e)=>l.crse).indexOf(item.crse);
-  });
-
+      var coursesItemsUnique = coursesItemsArray.filter(function (
+        item,
+        i,
+        sites
+      ) {
+        return (
+          i ==
+          sites
+            .map((l, e) => l.location2 + l.subj + l.crse)
+            .indexOf(item.location2 + item.subj + item.crse)
+        );
+      });
 
       $("#selectCourse").empty();
       $(coursesItemsUnique.sort()).each((l, e) => {
@@ -143,36 +150,140 @@ window.addEventListener("click", function (event) {
   }
 });
 let dataSource0 = null;
+function generateNumberFromText(text) {
+  let sum = 0;
+
+  // Calculate sum of character codes in the text
+  for (let i = 0; i < text.length; i++) {
+    sum += text.charCodeAt(i);
+  }
+
+  // Use modulo to get a number between 0 and 255
+  return sum % 360;
+}
+Date.prototype.addHours = function (h) {
+  this.setTime(this.getTime() + h * 60 * 60 * 1000);
+  return this;
+};
+
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return hash;
+}
+function getNumberBetween0And360(str) {
+  const hash = hashCode(str);
+  const absoluteHash = Math.abs(hash); // In case the hash is negative
+  return Math.random() * 360; // absoluteHash % 361; // Using 361 ensures values in the range 0-360
+}
+const myArrayCourseBackGRoungColor = {};
+
 btnLoadJQuery.onclick = () => {
   popup.style.display = "block";
 
-  dataSource0 = $(
-    // ".datadisplaytable tr:contains('1112'), tr:contains('2003'), tr:contains('1008'), tr:contains('1054'), tr:contains('2017'), tr:contains('1006'):gt(1)"
-    ".datadisplaytable tr:has(td)"
-  )
-    .map((l, e) => {
-      return {
-        crse: $(e).find("td:eq(3)").text().trim(),
-        name: $(e).find("td:eq(7)").text().trim(),
-        day: $(e).find("td:eq(8)").text().trim(),
-        time: $(e).find("td:eq(9)").text().trim(),
-        instructor: $(e).find("td:eq(13)").text().trim(),
-        location: $(e).find("td:eq(15)").text().trim(),
-        crn: $(e).find("td:eq(1)").text().trim(),
-        subj: $(e).find("td:eq(2)").text().trim(),
-        cmp: $(e).find("td:eq(5)").text().trim(),
-      };
-    })
-    .map((l, e) => {
-      e.title = e.crn + "\n" + e.crse + "\n" + e.name + "\n" + e.location;
-      e.location2 = e.location.split(" ")[0];
-      e.title2 = e.location2 + " - " + e.subj + " - " + e.crse + " - " + e.name;
-      return e;
-    });
+  if (!dataSource0) {
+    dataSource0 = $(
+      // ".datadisplaytable tr:contains('1112'), tr:contains('2003'), tr:contains('1008'), tr:contains('1054'), tr:contains('2017'), tr:contains('1006'):gt(1)"
+      ".datadisplaytable tr:has(td)"
+    )
+      .map((l, e) => {
+        return {
+          crse: $(e).find("td:eq(3)").text().trim(),
+          name: $(e).find("td:eq(7)").text().trim(),
+          day: $(e).find("td:eq(8)").text().trim(),
+          time: $(e).find("td:eq(9)").text().trim(),
+          instructor: $(e).find("td:eq(13)").text().trim(),
+          location: $(e).find("td:eq(15)").text().trim(),
+          crn: $(e).find("td:eq(1)").text().trim(),
+          subj: $(e).find("td:eq(2)").text().trim(),
+          cmp: $(e).find("td:eq(5)").text().trim(),
+        };
+      })
+      .map((l, ee) => {
+        ee.title =
+          ee.crn + "\n" + ee.crse + "\n" + ee.name + "\n" + ee.location;
+        ee.location2 = ee.location.split(" ")[0];
+        ee.title2 =
+          ee.location2 + " - " + ee.subj + " - " + ee.crse + " - " + ee.name;
 
-  let coursesItemsArray = Array.from(dataSource0);
+        //some improvements must be made about the color of each event in order to prevent different courses same color and make the student confuse
+        let key = ee.location2 + ee.subj + ee.crse;
+        if (!myArrayCourseBackGRoungColor[key]) {
+          let newValue = Math.trunc(Math.random() * 360);
+
+          for (let variable in myArrayCourseBackGRoungColor) {
+            if (myArrayCourseBackGRoungColor[variable] == newValue) {
+              newValue = Math.trunc(Math.random() * 360);
+            }
+          }
+          myArrayCourseBackGRoungColor[key] = newValue;
+        }
+        let rgbColor = `hsl(${myArrayCourseBackGRoungColor[key]},50%,50%)`;
+        console.log(rgbColor);
+
+        ee.backgroundColor = rgbColor;
+
+        let timeArray1 = ee.time.split("-").map((e, i, l) => {
+          let timeArray2 = e.split(" ");
+          let firstDayWeek = 14;
+          let newDay = new Date(
+            2024,
+            3,
+            ee.day == "M"
+              ? firstDayWeek + 1
+              : ee.day == "T"
+              ? firstDayWeek + 2
+              : ee.day == "W"
+              ? firstDayWeek + 3
+              : ee.day == "R"
+              ? firstDayWeek + 4
+              : ee.day == "F"
+              ? firstDayWeek + 5
+              : ee.day == "S"
+              ? firstDayWeek + 6
+              : firstDayWeek,
+            parseInt(timeArray2[0].split(":")[0]),
+            parseInt(timeArray2[0].split(":")[1])
+          );
+
+          return timeArray2[1] == "pm" && timeArray2[0].split(":")[0] != "12"
+            ? newDay?.addHours(12)
+            : newDay;
+        });
+        ee.start = timeArray1[0];
+        ee.end = timeArray1[1];
+
+        return ee;
+      });
+
+      if (calendarEl == null) {
+        calendarEl = document.createElement("div");
+        document.getElementsByClassName("popup-content")[0].appendChild(calendarEl);
+      }
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: "timeGridWeek",
+        headerToolbar: {
+          left: "",
+          center: "",
+          right: "",
+        },
+        initialDate: Date.now(),
+        // events: dataSource,
+      });
+    
+      calendar.render();
+      
+
+      let coursesItemsArray = Array.from(dataSource0);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
-    return i == sites.map((l,e)=>l.crse).indexOf(item.crse);
+    return (
+      i ==
+      sites
+        .map((l, e) => l.location2 + l.subj + l.crse)
+        .indexOf(item.location2 + item.subj + item.crse)
+    );
   });
 
   $("#selectCourse").empty();
@@ -183,6 +294,8 @@ btnLoadJQuery.onclick = () => {
     newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
   });
+  }
+  
   /*
   let locationItemsArray = Array.from(
     $(jQuery.unique(dataSource0.map((l, e) => e.location2)))
@@ -204,86 +317,9 @@ btnLoadJQuery.onclick = () => {
     $("#selectLocation").append(newOption);
   });
 */
-  let dataSource = Array.from(
-    dataSource0.map((l, ee) => {
-      let timeArray1 = ee.time.split("-").map((e, i, l) => {
-        let timeArray2 = e.split(" ");
-        return timeArray2[1] == "pm" && timeArray2[0].split(":")[0] != "12"
-          ? new Date(
-              2024,
-              3,
-              ee.day == "M"
-                ? 15
-                : ee.day == "T"
-                ? 16
-                : ee.day == "W"
-                ? 17
-                : ee.day == "R"
-                ? 18
-                : ee.day == "F"
-                ? 19
-                : ee.day == "S"
-                ? 20
-                : 14,
-              parseInt(timeArray2[0].split(":")[0]) + 12,
-              parseInt(timeArray2[0].split(":")[1])
-            )
-          : new Date(
-              2024,
-              3,
-              ee.day == "M"
-                ? 15
-                : ee.day == "T"
-                ? 16
-                : ee.day == "W"
-                ? 17
-                : ee.day == "R"
-                ? 18
-                : ee.day == "F"
-                ? 19
-                : ee.day == "S"
-                ? 20
-                : 14,
-              parseInt(timeArray2[0].split(":")[0]),
-              parseInt(timeArray2[0].split(":")[1])
-            );
-      });
-      ee.start = timeArray1[0];
-      ee.end = timeArray1[1];
-     ee.backgroundColor =
-        ee.crse == "1006"
-          ? "red"
-          : ee.crse == "2017"
-          ? "blue"
-          : ee.crse == "1054"
-          ? "gray"
-          : ee.crse == "1008"
-          ? "pink"
-          : ee.crse == "2003"
-          ? "black"
-          : ee.crse == "1112"
-          ? "green"
-          : "purple";
-      return ee;
-    })
-  );
+  // let dataSource = Array.from(dataSource0);
 
-  if (calendarEl == null) {
-    calendarEl = document.createElement("div");
-    document.getElementsByClassName("popup-content")[0].appendChild(calendarEl);
-  }
-  calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: "timeGridWeek",
-    headerToolbar: {
-      left: "",
-      center: "",
-      right: "",
-    },
-    initialDate: Date.now(),
-    events: dataSource,
-  });
-
-  calendar.render();
+ 
 
   //$(".headerwrapperdiv").hide();
 };
