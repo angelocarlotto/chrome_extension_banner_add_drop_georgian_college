@@ -1,17 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Banner Add'n Drop Extensions",
+  "name": "Banner Add n Drop Extensions",
   "description": "Intended to be used on the class search result of the add and drop page of Georgians Banner Page",
-  "version": "1.0",
-  "background": {
-    "service_worker": "popup.js",
-    "type": "module"
-  },
+  "version": "0.0.0.1",
   "content_scripts": [
     {
       "matches": [
-        "http://127.0.0.1:3000/*",
-        "http://127.0.0.1:5500/*",
         "https://sis-ssb.georgiancollege.ca:9110/GEOR/wwaddrp.P_GC_RegsGetCrse"
       ],
       "js": [
@@ -31,5 +25,6 @@
   "action": {
     "default_icon": "icons/icon.png",
     "default_popup": "popup.html"
-  }
+  },
+  "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtlNJ4lDCH+TDtjF+82Dc5TtdWFSNvtzj7YDghAbEsI1G3ujvRGxZUVq9F8ahAmZrn+k294E/DCsjOG70MSB30WJBnMxXlZJkmTea8AwqhxKgokmtw/ohxxpydI3jyJfWoxuReMv8EjTNKY97pQb+cFIlTd+PzVrpPHiywGWTbeym+JTi3/pxmzTKEa9IUyFPYSfnvASpwtis7bcBt9CFEThyZFrUd+alkLBjjGw8aA+NLtfsbLzp4yS2laWn+6bnAn/nnFXZZ/9GwG4KjOfQUBzOg39P5sKvTvSMJb+J01mtmZ5DZu4oQZbKJEvp4Bj27fujSpg5upRxgwfQifzMDQIDAQAB"
 }

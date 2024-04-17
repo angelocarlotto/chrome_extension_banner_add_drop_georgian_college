@@ -157,7 +157,8 @@ function updateCourseOptionsOnSelecElement(filterData) {
   $(coursesItemsUnique.sort()).each((l, e) => {
     const newOption = document.createElement("option");
     newOption.value = e.crse;
-    newOption.innerText = e.title2+`(${dataSource0.filter((i,ee)=>e.key==ee.key).length})`;
+    newOption.innerText =
+      e.title2 + `(${dataSource0.filter((i, ee) => e.key == ee.key).length})`;
     newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
   });
@@ -169,6 +170,14 @@ Date.prototype.addHours = function (h) {
 };
 
 const myArrayCourseBackGRoungColor = {};
+
+function getLastSunday() {
+  const date = new Date();
+  const today = date.getDate();
+  const currentDay = date.getDay();
+  const newDate = date.setDate(today - (currentDay || 7));
+  return new Date(newDate);
+}
 
 btnLoadJQuery.onclick = () => {
   popup.style.display = "block";
@@ -194,19 +203,12 @@ btnLoadJQuery.onclick = () => {
       })
       .filter((i, item, list) => item.crn != "")
       .map((l, ee) => {
-        
         ee.title =
           ee.crn + "\n" + ee.crse + "\n" + ee.name + "\n" + ee.location;
         ee.location2 = ee.location.split(" ")[0];
         ee.title2 =
-          ee.location2 +
-          " - " +
-          ee.subj +
-          " - " +
-          ee.crse +
-          " - " +
-          ee.name;
-          ee.key = ee.subj + ee.crse + ee.location2;
+          ee.location2 + " - " + ee.subj + " - " + ee.crse + " - " + ee.name;
+        ee.key = ee.subj + ee.crse + ee.location2;
 
         //some improvements must be made about the color of each event in order to prevent different courses same color and make the student confuse
         let key = ee.location2 + ee.subj + ee.crse;
@@ -227,10 +229,13 @@ btnLoadJQuery.onclick = () => {
 
         let timeArray1 = ee.time.split("-").map((e, i, l) => {
           let timeArray2 = e.split(" ");
-          let firstDayWeek = 14;
+          let firstDayWeek = getLastSunday().getDate();
+
+          let lastSunday=getLastSunday();
+
           let newDay = new Date(
-            2024,
-            3,
+            getLastSunday().getYear()+1900,
+            getLastSunday().getMonth(),
             ee.day == "M"
               ? firstDayWeek + 1
               : ee.day == "T"
@@ -265,64 +270,7 @@ btnLoadJQuery.onclick = () => {
         .appendChild(calendarEl);
     }
     initializeOrUpdateCalendar([]);
-    /*
-      calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: "timeGridWeek",
-        headerToolbar: {
-          left: "",
-          center: "",
-          right: "",
-        },
-        initialDate: Date.now(),
-        // events: dataSource,
-      });
-    
-      calendar.render();
-      */
 
     updateCourseOptionsOnSelecElement(dataSource0);
-    /* let coursesItemsArray = Array.from(dataSource0);
-  var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
-    return (
-      i ==
-      sites
-        .map((l, e) => l.location2 + l.subj + l.crse)
-        .indexOf(item.location2 + item.subj + item.crse)
-    );
-  });
-
-  $("#selectCourse").empty();
-  $(coursesItemsUnique.sort()).each((l, e) => {
-    const newOption = document.createElement("option");
-    newOption.value = e.crse;
-    newOption.innerText = e.title2;
-    newOption.dataset.obj = JSON.stringify(e);
-    $("#selectCourse").append(newOption);
-  });*/
   }
-
-  /*
-  let locationItemsArray = Array.from(
-    $(jQuery.unique(dataSource0.map((l, e) => e.location2)))
-  );
-  var locationItemsUnique = locationItemsArray.filter(function (
-    item,
-    i,
-    sites
-  ) {
-    return i == sites.indexOf(item);
-  });
-
-  $("#selectLocation").empty();
-  $(locationItemsUnique.sort()).each((l, e) => {
-    const newOption = document.createElement("option");
-    newOption.value = e;
-    newOption.innerText = e;
-    newOption.dataset.obj=JSON.stringify(e);
-    $("#selectLocation").append(newOption);
-  });
-*/
-  // let dataSource = Array.from(dataSource0);
-
-  //$(".headerwrapperdiv").hide();
 };
