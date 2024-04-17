@@ -7,69 +7,22 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": [
-    "accessibilityFeatures.modify",
-    "accessibilityFeatures.read",
-    "activeTab",
-    "alarms",
-    "background",
-    "bookmarks",
-    "browsingData",
-    "clipboardRead",
-    "clipboardWrite",
-    "contentSettings",
-    "contextMenus",
-    "cookies",
-    "debugger",
-    "declarativeContent",
-    "declarativeNetRequest",
-    "declarativeNetRequestWithHostAccess",
-    "declarativeNetRequestFeedback",
-    "desktopCapture",
-    "downloads",
-    "downloads.open",
-    "downloads.ui",
-    "favicon",
-    "fontSettings",
-    "gcm",
-    "geolocation",
-    "history",
-    "identity",
-    "identity.email",
-    "idle",
-    "management",
-    "nativeMessaging",
-    "notifications",
-    "offscreen",
-    "pageCapture",
-    "power",
-    "printerProvider",
-    "privacy",
-    "proxy",
-    "readingList",
-    "scripting",
-    "search",
-    "sessions",
-    "sidePanel",
-    "storage",
-    "system.cpu",
-    "system.display",
-    "system.memory",
-    "system.storage",
-    "tabCapture",
-    "tabGroups",
-    "tabs",
-    "topSites",
-    "tts",
-    "ttsEngine",
-    "unlimitedStorage",
-    "webAuthenticationProxy",
-    "webNavigation",
-    "webRequest"
+  "content_scripts": [
+    {
+      "matches": [
+        "http://127.0.0.1:3000/*",
+        "https://sis-ssb.georgiancollege.ca:9110/GEOR/wwaddrp.P_GC_RegsGetCrse"
+      ],
+      "js": [
+        "app.js",
+        "scripts/jquery-3.7.1.min.js",
+        "scripts/index.global.min.js"
+      ],
+      "css": ["styles/app.css"]
+    }
   ],
-  "optional_host_permissions": ["https://www.google.com/"],
   "action": {
-    "default_popup": "addndrop_extension.html",
-    "default_icon": "images/banner.png"
+    "default_icon": "images/banner.png",
+    "default_popup": "addndrop_extension.html"
   }
 }
