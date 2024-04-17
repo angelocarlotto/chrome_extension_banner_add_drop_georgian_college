@@ -92,42 +92,12 @@ txtFilterSelect.addEventListener("keydown", function (e) {
     let filterData = dataSource0.filter((i, ee) =>
       regex.test(ee.title2.toLowerCase())
     );
+
+    //this property will be true when the user directly click on the select elemnt, on this moment is not intened to change it self. it will be updates only when the event coment from the change of the text field
     if (!e.detail?.doNotChangeSelect) {
-      let coursesItemsArray = Array.from(filterData);
-      var coursesItemsUnique = coursesItemsArray.filter(function (
-        item,
-        i,
-        sites
-      ) {
-        return (
-          i ==
-          sites
-            .map((l, e) => l.location2 + l.subj + l.crse)
-            .indexOf(item.location2 + item.subj + item.crse)
-        );
-      });
-
-      $("#selectCourse").empty();
-      $(coursesItemsUnique.sort()).each((l, e) => {
-        const newOption = document.createElement("option");
-        newOption.value = e.crse;
-        newOption.innerText = e.title2;
-        newOption.dataset.obj = JSON.stringify(e);
-        $("#selectCourse").append(newOption);
-      });
+      updateCourseOptionsOnSelecElement(filterData);
     }
-    calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: "timeGridWeek",
-      headerToolbar: {
-        left: "",
-        center: "",
-        right: "",
-      },
-      initialDate: Date.now(),
-      events: Array.from(filterData),
-    });
-
-    calendar.render();
+    initializeOrUpdateCalendar(filterData);
   }, 1000);
 });
 
@@ -150,34 +120,52 @@ window.addEventListener("click", function (event) {
   }
 });
 let dataSource0 = null;
-function generateNumberFromText(text) {
-  let sum = 0;
+function initializeOrUpdateCalendar(filterData) {
+  calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: "timeGridWeek",
+    headerToolbar: {
+      left: "",
+      center: "",
+      right: "",
+    },
+    initialDate: Date.now(),
+    events: Array.from(filterData),
+  });
 
-  // Calculate sum of character codes in the text
-  for (let i = 0; i < text.length; i++) {
-    sum += text.charCodeAt(i);
-  }
-
-  // Use modulo to get a number between 0 and 255
-  return sum % 360;
+  calendar.render();
 }
+
+function updateCourseOptionsOnSelecElement(filterData) {
+  let coursesItemsArray = Array.from(filterData);
+  var coursesItemsUnique = coursesItemsArray.filter(function (
+    item,
+    i,
+    sites
+  ) {
+    return (
+      i ==
+      sites
+        .map((l, e) => l.location2 + l.subj + l.crse)
+        .indexOf(item.location2 + item.subj + item.crse)
+    );
+  });
+
+  $("#selectCourse").empty();
+  $(coursesItemsUnique.sort()).each((l, e) => {
+    const newOption = document.createElement("option");
+    newOption.value = e.crse;
+    newOption.innerText = e.title2;
+    newOption.dataset.obj = JSON.stringify(e);
+    $("#selectCourse").append(newOption);
+  });
+}
+
 Date.prototype.addHours = function (h) {
   this.setTime(this.getTime() + h * 60 * 60 * 1000);
   return this;
 };
 
-function hashCode(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return hash;
-}
-function getNumberBetween0And360(str) {
-  const hash = hashCode(str);
-  const absoluteHash = Math.abs(hash); // In case the hash is negative
-  return Math.random() * 360; // absoluteHash % 361; // Using 361 ensures values in the range 0-360
-}
+
 const myArrayCourseBackGRoungColor = {};
 
 btnLoadJQuery.onclick = () => {
@@ -262,6 +250,8 @@ btnLoadJQuery.onclick = () => {
         calendarEl = document.createElement("div");
         document.getElementsByClassName("popup-content")[0].appendChild(calendarEl);
       }
+      initializeOrUpdateCalendar([]);
+    /*
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "timeGridWeek",
         headerToolbar: {
@@ -274,9 +264,10 @@ btnLoadJQuery.onclick = () => {
       });
     
       calendar.render();
+      */
       
-
-      let coursesItemsArray = Array.from(dataSource0);
+      updateCourseOptionsOnSelecElement(dataSource0);
+     /* let coursesItemsArray = Array.from(dataSource0);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
     return (
       i ==
@@ -293,7 +284,8 @@ btnLoadJQuery.onclick = () => {
     newOption.innerText = e.title2;
     newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
-  });
+  });*/
+
   }
   
   /*
