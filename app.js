@@ -6,7 +6,7 @@ document
 btnLoadJQuery.innerText = "Open Amazin Search PopUp 🥳";
 
 var calendar = null;
-var calendarEl =null;
+var calendarEl = null;
 //=======
 let html = `<div id="popup" class="popup-container">
 <div class="popup-content">
@@ -14,7 +14,7 @@ let html = `<div id="popup" class="popup-container">
   <h2>The amazin Add'n Drop Filter</h2>
   <div>
   <label for="txtFilterSelect" >Inform Course</label>
-  <input type="text" id="txtFilterSelect" >
+  <textarea type="text" id="txtFilterSelect" ></textarea>
   <br>
   <label for="selectCourse">Select Course</label>
   <select id="selectCourse" multiple>
@@ -29,7 +29,7 @@ let html = `<div id="popup" class="popup-container">
   <option>none</option>  
   </select>
   <br>
-    <button id="btnFilter">Filter</button>
+    <button style="display:none" id="btnFilter">Filter</button>
   </div>
 </div>
 </div>
@@ -52,10 +52,22 @@ const popup = document.getElementById("popup");
 const closeBtn = document.querySelector(".close-btn");
 
 btnFilter.addEventListener("click", function (e) {
+  //will do something in the future
+});
+const triggerEvent = (el, eventType, detail) =>
+  el.dispatchEvent(new CustomEvent(eventType, { detail }));
 
-  
-
-
+selectCourse.addEventListener("change", function (e) {
+  console.log($(e.target).find(":selected").val());
+  let search="";
+  $(e.target)
+    .find(":selected")
+    .each((l, e) => {
+      let obj=JSON.parse(e.dataset.obj);
+      search+=`"${obj.location2}.*${obj.subj}.*${obj.crse}" `;
+    });
+  txtFilterSelect.value =search;// $(e.target).val().join(" ");
+  triggerEvent(txtFilterSelect, "keydown", { doNotChangeSelect: true });
 });
 
 //openPopupBtn.addEventListener("click", function () {
@@ -80,15 +92,23 @@ txtFilterSelect.addEventListener("keydown", function (e) {
     let filterData = dataSource0.filter((i, ee) =>
       regex.test(ee.title2.toLowerCase())
     );
+    if (!e.detail?.doNotChangeSelect) {
 
-    $("#selectCourse").empty();
-    $(filterData.sort()).each((l, e) => {
-      const newOption = document.createElement("option");
-      newOption.value = e.crse;
-      newOption.innerText = e.title2;
-      $("#selectCourse").append(newOption);
-    });
+      let coursesItemsArray = Array.from(filterData);
+  var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
+    return i == sites.map((l,e)=>l.crse).indexOf(item.crse);
+  });
 
+
+      $("#selectCourse").empty();
+      $(coursesItemsUnique.sort()).each((l, e) => {
+        const newOption = document.createElement("option");
+        newOption.value = e.crse;
+        newOption.innerText = e.title2;
+        newOption.dataset.obj = JSON.stringify(e);
+        $("#selectCourse").append(newOption);
+      });
+    }
     calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: "timeGridWeek",
       headerToolbar: {
@@ -99,10 +119,8 @@ txtFilterSelect.addEventListener("keydown", function (e) {
       initialDate: Date.now(),
       events: Array.from(filterData),
     });
-  
+
     calendar.render();
-
-
   }, 1000);
 });
 
@@ -134,19 +152,19 @@ btnLoadJQuery.onclick = () => {
   )
     .map((l, e) => {
       return {
-        crse: $(e).find("td:eq(3)").text(),
-        name: $(e).find("td:eq(7)").text(),
-        day: $(e).find("td:eq(8)").text(),
-        time: $(e).find("td:eq(9)").text(),
-        instructor: $(e).find("td:eq(13)").text(),
-        location: $(e).find("td:eq(15)").text(),
-        crn: $(e).find("td:eq(1)").text(),
-        subj: $(e).find("td:eq(2)").text(),
-        cmp: $(e).find("td:eq(5)").text(),
+        crse: $(e).find("td:eq(3)").text().trim(),
+        name: $(e).find("td:eq(7)").text().trim(),
+        day: $(e).find("td:eq(8)").text().trim(),
+        time: $(e).find("td:eq(9)").text().trim(),
+        instructor: $(e).find("td:eq(13)").text().trim(),
+        location: $(e).find("td:eq(15)").text().trim(),
+        crn: $(e).find("td:eq(1)").text().trim(),
+        subj: $(e).find("td:eq(2)").text().trim(),
+        cmp: $(e).find("td:eq(5)").text().trim(),
       };
     })
     .map((l, e) => {
-      e.title = e.crse + "\n" + e.name + "\n" + e.location;
+      e.title = e.crn + "\n" + e.crse + "\n" + e.name + "\n" + e.location;
       e.location2 = e.location.split(" ")[0];
       e.title2 = e.location2 + " - " + e.subj + " - " + e.crse + " - " + e.name;
       return e;
@@ -154,7 +172,7 @@ btnLoadJQuery.onclick = () => {
 
   let coursesItemsArray = Array.from(dataSource0);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
-    return i == sites.indexOf(item);
+    return i == sites.map((l,e)=>l.crse).indexOf(item.crse);
   });
 
   $("#selectCourse").empty();
@@ -162,9 +180,10 @@ btnLoadJQuery.onclick = () => {
     const newOption = document.createElement("option");
     newOption.value = e.crse;
     newOption.innerText = e.title2;
+    newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
   });
-
+  /*
   let locationItemsArray = Array.from(
     $(jQuery.unique(dataSource0.map((l, e) => e.location2)))
   );
@@ -181,9 +200,10 @@ btnLoadJQuery.onclick = () => {
     const newOption = document.createElement("option");
     newOption.value = e;
     newOption.innerText = e;
+    newOption.dataset.obj=JSON.stringify(e);
     $("#selectLocation").append(newOption);
   });
-
+*/
   let dataSource = Array.from(
     dataSource0.map((l, ee) => {
       let timeArray1 = ee.time.split("-").map((e, i, l) => {
@@ -249,7 +269,7 @@ btnLoadJQuery.onclick = () => {
   );
 
   if (calendarEl == null) {
-     calendarEl = document.createElement("div");
+    calendarEl = document.createElement("div");
     document.getElementsByClassName("popup-content")[0].appendChild(calendarEl);
   }
   calendar = new FullCalendar.Calendar(calendarEl, {
