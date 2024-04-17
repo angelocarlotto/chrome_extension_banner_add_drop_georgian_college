@@ -8,30 +8,33 @@ btnLoadJQuery.innerText = "🔎COURSES SEARCH++🚀";
 var calendar = null;
 var calendarEl = null;
 //=======
-let html = `<div id="popup" class="popup-container">
-<div class="popup-content">
-  <span class="close-btn">&times;</span>
-  <h2>The amazin Add'n Drop Filter</h2>
-  <div>
-  <label for="txtFilterSelect" >Inform Course</label>
-  <textarea type="text" id="txtFilterSelect" ></textarea>
-  <br>
-  <label for="selectCourse">Select Course</label>
-  <select id="selectCourse" multiple>
-  <option>none</option>  
-  </select>
-
-  <label  style="display:none"  for="txtFilterLocation">Inform Location</label>
-  <input   type="text" id="txtFilterLocation"/>
-  <br>
-  <label style="display:none" for="selectLocation">Select Location</label>
-  <select  id="selectLocation" multiple>
-  <option>none</option>  
-  </select>
-  <br>
-    <button style="display:none" id="btnFilter">Filter</button>
-  </div>
-</div>
+let html = `
+<div id="popup" class="popup-container">
+    <div class="popup-content">
+        <span class="close-btn">&times;</span>
+        <h2>The amazin Add'n Drop Filter</h2>
+        <div>
+            <label for="txtFilterSelect" >Inform Course</label>
+            <textarea type="text" id="txtFilterSelect" ></textarea>
+            <br>
+            <label for="selectCourse">Select Course</label>
+            <select id="selectCourse" multiple>
+               <option>none</option>  
+            </select>
+            <label  style="display:none"  for="txtFilterLocation">Inform Location</label>
+            <input   type="text" id="txtFilterLocation"/>
+            <br>
+            <label style="display:none" for="selectLocation">Select Location</label>
+            <select  id="selectLocation" multiple>
+                <option>none</option>  
+            </select>
+            <br>
+            <div>
+              <label style="display:none"  id="lblTimer">Pesquisando...</label>
+            </div>
+            <button style="display:none" id="btnFilter">Filter</button>
+        </div>
+    </div>
 </div>
 `;
 //<button id="open-popup">Open Popup</button>
@@ -42,6 +45,7 @@ document.body.appendChild(newDiv);
 
 //=================
 
+const lblTimer = document.getElementById("lblTimer");
 const selectLocation = document.getElementById("selectLocation");
 const txtFilterSelect = document.getElementById("txtFilterSelect");
 const txtFilterLocation = document.getElementById("txtFilterLocation");
@@ -98,7 +102,10 @@ txtFilterSelect.addEventListener("keydown", function (e) {
       updateCourseOptionsOnSelecElement(filterData);
     }
     initializeOrUpdateCalendar(filterData);
-  }, 1000);
+    lblTimer.style.display = "none";
+  }, 2000);
+
+  lblTimer.style.display = "block";
 });
 
 var token2 = null;
@@ -137,11 +144,7 @@ function initializeOrUpdateCalendar(filterData) {
 
 function updateCourseOptionsOnSelecElement(filterData) {
   let coursesItemsArray = Array.from(filterData);
-  var coursesItemsUnique = coursesItemsArray.filter(function (
-    item,
-    i,
-    sites
-  ) {
+  var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
     return (
       i ==
       sites
@@ -154,7 +157,7 @@ function updateCourseOptionsOnSelecElement(filterData) {
   $(coursesItemsUnique.sort()).each((l, e) => {
     const newOption = document.createElement("option");
     newOption.value = e.crse;
-    newOption.innerText = e.title2;
+    newOption.innerText = e.title2+`(${dataSource0.filter((i,ee)=>e.key==ee.key).length})`;
     newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
   });
@@ -164,7 +167,6 @@ Date.prototype.addHours = function (h) {
   this.setTime(this.getTime() + h * 60 * 60 * 1000);
   return this;
 };
-
 
 const myArrayCourseBackGRoungColor = {};
 
@@ -185,18 +187,26 @@ btnLoadJQuery.onclick = () => {
           time: $(e).find("td:eq(9)").text().trim(),
           instructor: $(e).find("td:eq(13)").text().trim(),
           location: $(e).find("td:eq(15)").text().trim(),
-          
+
           subj: $(e).find("td:eq(2)").text().trim(),
           cmp: $(e).find("td:eq(5)").text().trim(),
         };
       })
-      .filter((i,item,list)=>item.crn!="")
+      .filter((i, item, list) => item.crn != "")
       .map((l, ee) => {
+        
         ee.title =
           ee.crn + "\n" + ee.crse + "\n" + ee.name + "\n" + ee.location;
         ee.location2 = ee.location.split(" ")[0];
         ee.title2 =
-          ee.location2 + " - " + ee.subj + " - " + ee.crse + " - " + ee.name;
+          ee.location2 +
+          " - " +
+          ee.subj +
+          " - " +
+          ee.crse +
+          " - " +
+          ee.name;
+          ee.key = ee.subj + ee.crse + ee.location2;
 
         //some improvements must be made about the color of each event in order to prevent different courses same color and make the student confuse
         let key = ee.location2 + ee.subj + ee.crse;
@@ -248,11 +258,13 @@ btnLoadJQuery.onclick = () => {
         return ee;
       });
 
-      if (calendarEl == null) {
-        calendarEl = document.createElement("div");
-        document.getElementsByClassName("popup-content")[0].appendChild(calendarEl);
-      }
-      initializeOrUpdateCalendar([]);
+    if (calendarEl == null) {
+      calendarEl = document.createElement("div");
+      document
+        .getElementsByClassName("popup-content")[0]
+        .appendChild(calendarEl);
+    }
+    initializeOrUpdateCalendar([]);
     /*
       calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "timeGridWeek",
@@ -267,9 +279,9 @@ btnLoadJQuery.onclick = () => {
     
       calendar.render();
       */
-      
-      updateCourseOptionsOnSelecElement(dataSource0);
-     /* let coursesItemsArray = Array.from(dataSource0);
+
+    updateCourseOptionsOnSelecElement(dataSource0);
+    /* let coursesItemsArray = Array.from(dataSource0);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
     return (
       i ==
@@ -287,9 +299,8 @@ btnLoadJQuery.onclick = () => {
     newOption.dataset.obj = JSON.stringify(e);
     $("#selectCourse").append(newOption);
   });*/
-
   }
-  
+
   /*
   let locationItemsArray = Array.from(
     $(jQuery.unique(dataSource0.map((l, e) => e.location2)))
@@ -312,8 +323,6 @@ btnLoadJQuery.onclick = () => {
   });
 */
   // let dataSource = Array.from(dataSource0);
-
- 
 
   //$(".headerwrapperdiv").hide();
 };
