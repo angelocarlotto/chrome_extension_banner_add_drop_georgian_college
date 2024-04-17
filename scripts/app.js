@@ -179,16 +179,18 @@ btnLoadJQuery.onclick = () => {
       .map((l, e) => {
         return {
           crse: $(e).find("td:eq(3)").text().trim(),
+          crn: $(e).find("td:eq(1)").text().trim(),
           name: $(e).find("td:eq(7)").text().trim(),
           day: $(e).find("td:eq(8)").text().trim(),
           time: $(e).find("td:eq(9)").text().trim(),
           instructor: $(e).find("td:eq(13)").text().trim(),
           location: $(e).find("td:eq(15)").text().trim(),
-          crn: $(e).find("td:eq(1)").text().trim(),
+          
           subj: $(e).find("td:eq(2)").text().trim(),
           cmp: $(e).find("td:eq(5)").text().trim(),
         };
       })
+      .filter((i,item,list)=>item.crn!="")
       .map((l, ee) => {
         ee.title =
           ee.crn + "\n" + ee.crse + "\n" + ee.name + "\n" + ee.location;
