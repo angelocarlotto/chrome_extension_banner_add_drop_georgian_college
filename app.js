@@ -250,7 +250,7 @@ btnLoadJQuery.onclick = () => {
       });
       ee.start = timeArray1[0];
       ee.end = timeArray1[1];
-      ee.backgroundColor =
+     ee.backgroundColor =
         ee.crse == "1006"
           ? "red"
           : ee.crse == "2017"
