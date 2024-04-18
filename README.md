@@ -16,6 +16,8 @@
       <li>Class Search</li>
       <li>Class Search(Leave all filter empty)</li>
     </ol>
+    <h1>Google Extension Store Link</h1>
+    <p>https://chromewebstore.google.com/detail/banner-add-n-drop-extensi/hmpmipacfnaimhmnicaalfkcmbgkeojh</p>
     <h1>Source Code</h1>
     <p>
       <a
