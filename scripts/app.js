@@ -30,7 +30,7 @@ let html = `
             </select>
             <br>
             <div>
-              <label style="display:none"  id="lblTimer">Pesquisando...</label>
+              <label style="display:none"  id="lblTimer">Searching will begin in 2s...</label>
             </div>
             <button style="display:none" id="btnFilter">Filter</button>
         </div>
@@ -79,6 +79,7 @@ selectCourse.addEventListener("change", function (e) {
 //});
 var token = null;
 txtFilterSelect.addEventListener("keydown", function (e) {
+  localStorage.setItem("bannerQuarry", e.target.value);
   if (token != null) clearTimeout(token);
   token = setTimeout(() => {
     console.log(e);
@@ -118,6 +119,7 @@ txtFilterLocation.addEventListener("keydown", function (e) {
 
 closeBtn.addEventListener("click", function () {
   popup.style.display = "none";
+  localStorage.setItem("isWindowOpen", false);
 });
 
 // Optional: Close when clicking outside the popup
@@ -178,10 +180,7 @@ function getLastSunday() {
   const newDate = date.setDate(today - (currentDay || 7));
   return new Date(newDate);
 }
-
-btnLoadJQuery.onclick = () => {
-  popup.style.display = "block";
-
+function loadData() {
   if (!dataSource0) {
     dataSource0 = $(
       // ".datadisplaytable tr:contains('1112'), tr:contains('2003'), tr:contains('1008'), tr:contains('1054'), tr:contains('2017'), tr:contains('1006'):gt(1)"
@@ -231,10 +230,10 @@ btnLoadJQuery.onclick = () => {
           let timeArray2 = e.split(" ");
           let firstDayWeek = getLastSunday().getDate();
 
-          let lastSunday=getLastSunday();
+          let lastSunday = getLastSunday();
 
           let newDay = new Date(
-            getLastSunday().getYear()+1900,
+            getLastSunday().getYear() + 1900,
             getLastSunday().getMonth(),
             ee.day == "M"
               ? firstDayWeek + 1
@@ -273,4 +272,26 @@ btnLoadJQuery.onclick = () => {
 
     updateCourseOptionsOnSelecElement(dataSource0);
   }
+}
+
+//this timmer is just to make sure the jquery was loaded
+setTimeout(()=>{
+
+  $(document).ready(() => {
+    if (localStorage.getItem("isWindowOpen") == "true") {
+      popup.style.display = "block";
+      loadData();
+    }
+    txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
+    triggerEvent(txtFilterSelect, "keydown", {  });
+  });
+},1000)
+
+
+
+btnLoadJQuery.onclick = () => {
+  localStorage.setItem("isWindowOpen", true);
+  popup.style.display = "block";
+  loadData();
+  
 };
