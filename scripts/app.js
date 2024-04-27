@@ -82,12 +82,12 @@ txtFilterSelect.addEventListener("keydown", function (e) {
   localStorage.setItem("bannerQuarry", e.target.value);
   if (token != null) clearTimeout(token);
   token = setTimeout(() => {
-    console.log(e);
+    //console.log(e);
 
     let regex = new RegExp(
       e.target.value
         .toLowerCase()
-        .split(`"`)
+        .split(/\“|\"/)
         .map((l, e) => l.trim().split(` `))
         .filter((e) => e != ``)
         .flat()
@@ -171,7 +171,64 @@ Date.prototype.addHours = function (h) {
   return this;
 };
 
-const myArrayCourseBackGRoungColor = {};
+function getMyArrayCourseBackGRoungColor() {
+  let myArrayCourseBackGRoungColor = JSON.parse(
+    localStorage.getItem("myArrayCourseBackGRoungColor")
+  );
+  if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
+  localStorage.setItem(
+    "myArrayCourseBackGRoungColor",
+    JSON.stringify(myArrayCourseBackGRoungColor)
+  );
+
+  return myArrayCourseBackGRoungColor;
+}
+function getMyArrayCourseBackGRoungColor(key) {
+  let myArrayCourseBackGRoungColor = JSON.parse(
+    localStorage.getItem("myArrayCourseBackGRoungColor")
+  );
+  if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
+  localStorage.setItem(
+    "myArrayCourseBackGRoungColor",
+    JSON.stringify(myArrayCourseBackGRoungColor)
+  );
+
+  return myArrayCourseBackGRoungColor[key];
+}
+function setMyArrayCourseBackGRoungColor(key, value) {
+  let myArrayCourseBackGRoungColor = JSON.parse(
+    localStorage.getItem("myArrayCourseBackGRoungColor")
+  );
+  if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
+
+  myArrayCourseBackGRoungColor[key] = value;
+
+  localStorage.setItem(
+    "myArrayCourseBackGRoungColor",
+    JSON.stringify(myArrayCourseBackGRoungColor)
+  );
+}
+
+function getColorToCourse(ee) {
+  let key = ee.location2 + ee.subj + ee.crse;
+  if (!getMyArrayCourseBackGRoungColor(key)) {
+    let newValue = Math.trunc(Math.random() * 360);
+
+    //iterate on all properties of the object each represent each course code key,
+    //if there is any property with the new random value, it will generate new one,
+    // but it doesnt mean it wont generate a repeted one because there is 360 colocar
+    //to around 2000 differente courses. this is a flaw with minor impact.
+    for (let variable in getMyArrayCourseBackGRoungColor()) {
+      if (getMyArrayCourseBackGRoungColor(variable) == newValue) {
+        newValue = Math.trunc(Math.random() * 360);
+      }
+    }
+    setMyArrayCourseBackGRoungColor(key, newValue);
+  }
+  let rgbColor = `hsl(${getMyArrayCourseBackGRoungColor(key)},50%,50%)`;
+  // console.log(rgbColor);
+  return rgbColor;
+}
 
 function getLastSunday() {
   const date = new Date();
@@ -210,19 +267,8 @@ function loadData() {
         ee.key = ee.subj + ee.crse + ee.location2;
 
         //some improvements must be made about the color of each event in order to prevent different courses same color and make the student confuse
-        let key = ee.location2 + ee.subj + ee.crse;
-        if (!myArrayCourseBackGRoungColor[key]) {
-          let newValue = Math.trunc(Math.random() * 360);
 
-          for (let variable in myArrayCourseBackGRoungColor) {
-            if (myArrayCourseBackGRoungColor[variable] == newValue) {
-              newValue = Math.trunc(Math.random() * 360);
-            }
-          }
-          myArrayCourseBackGRoungColor[key] = newValue;
-        }
-        let rgbColor = `hsl(${myArrayCourseBackGRoungColor[key]},50%,50%)`;
-        console.log(rgbColor);
+        let rgbColor = getColorToCourse(ee);
 
         ee.backgroundColor = rgbColor;
 
@@ -271,6 +317,9 @@ function loadData() {
     initializeOrUpdateCalendar([]);
 
     updateCourseOptionsOnSelecElement(dataSource0);
+
+    txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
+    triggerEvent(txtFilterSelect, "keydown", {  });
   }
 }
 
@@ -281,9 +330,10 @@ setTimeout(()=>{
     if (localStorage.getItem("isWindowOpen") == "true") {
       popup.style.display = "block";
       loadData();
-    }
-    txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
+
+      txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
     triggerEvent(txtFilterSelect, "keydown", {  });
+    }
   });
 },1000)
 
@@ -293,5 +343,4 @@ btnLoadJQuery.onclick = () => {
   localStorage.setItem("isWindowOpen", true);
   popup.style.display = "block";
   loadData();
-  
 };
