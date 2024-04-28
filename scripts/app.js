@@ -7,6 +7,9 @@ btnLoadJQuery.innerText = "🔎COURSES SEARCH++🚀";
 
 var calendar = null;
 var calendarEl = null;
+let timeTableEventsCourse = [];
+var tokenRefreshSearching = null;
+let dataSource0 = null;
 //=======
 let html = `
 <div id="popup" class="popup-container">
@@ -21,18 +24,17 @@ let html = `
             <select id="selectCourse" multiple>
                <option>none</option>  
             </select>
-            <label  style="display:none"  for="txtFilterLocation">Inform Location</label>
-            <input   type="text" id="txtFilterLocation"/>
-            <br>
-            <label style="display:none" for="selectLocation">Select Location</label>
-            <select  id="selectLocation" multiple>
-                <option>none</option>  
-            </select>
-            <br>
+            
+            <hr>
+            <div id="divTimeTable">
+            If you want to load your current time table, please inform the date <input id="inputDateTimeTable" type="date"/> of semester's first week, then click <button id="btnLoadTimeTable">Load Time table</button> OR <button id="btnRemoveTimeTable">Remove Time Table</button><label id="lblTimeTable"></label>
+            </div>
+            <hr>
+            If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OR click over the course you want to change it's color.<label id="lblRefreshColors"></label>
+            <hr>
             <div>
               <label style="display:none"  id="lblTimer">Searching will begin in 2s...</label>
             </div>
-            <button style="display:none" id="btnFilter">Filter</button>
         </div>
     </div>
 </div>
@@ -46,22 +48,123 @@ document.body.appendChild(newDiv);
 //=================
 
 const lblTimer = document.getElementById("lblTimer");
-const selectLocation = document.getElementById("selectLocation");
 const txtFilterSelect = document.getElementById("txtFilterSelect");
-const txtFilterLocation = document.getElementById("txtFilterLocation");
-const btnFilter = document.getElementById("btnFilter");
+const inputDateTimeTable = document.getElementById("inputDateTimeTable");
+const btnLoadTimeTable = document.getElementById("btnLoadTimeTable");
+const btnRefreshColors = document.getElementById("btnRefreshColors");
+const lblTimeTable = document.getElementById("lblTimeTable");
+const lblRefreshColors = document.getElementById("lblRefreshColors");
+const btnRemoveTimeTable = document.getElementById("btnRemoveTimeTable");
 
-//const openPopupBtn = document.getElementById("open-popup");
 const popup = document.getElementById("popup");
 const closeBtn = document.querySelector(".close-btn");
+btnRefreshColors.addEventListener("click", function (e) {
+  consoleLog(arguments);
+  lblRefreshColors.innerText = "Loading...";
+  localStorage.setItem("myArrayCourseBackGRoungColor", null);
+  dataSource0.each((a, b) => {
+    b.generateBackGroundColorToCourse();
+  });
 
-btnFilter.addEventListener("click", function (e) {
-  //will do something in the future
+  triggerEvent(txtFilterSelect, "keydown", {});
 });
+
+btnRemoveTimeTable.addEventListener("click", function (e) {
+  timeTableEventsCourse.forEach((a, b, c) => a.remove());
+});
+
+btnLoadTimeTable.addEventListener("click", function (e) {
+  consoleLog(arguments);
+  lblTimeTable.innerText = "Loading...";
+  if (inputDateTimeTable.value) {
+    $.ajax({
+      url: "https://sis-ssb.georgiancollege.ca:9110/GEOR/bwskfshd.P_CrseSchd",
+      success: (responseAux, b) => {
+        timeTableEventsCourse.forEach((a, b, c) => a.remove());
+        let linkWithContent = $(
+          $(responseAux)
+            .filter("div.headerwrapperdiv")
+            .map(
+              (i, e) =>
+                $($(e.children).filter("div.pagebodydiv")[0].children).filter(
+                  "table.datadisplaytable"
+                )[0]
+            )[0]
+        ).find("td:has(a)");
+
+        let tabelCells = linkWithContent.map((i, e) => ({
+          td: e,
+          cellIndex: e.cellIndex,
+          parentHasTH: $(e.parentElement.children).filter("th").length,
+        }));
+        tabelCells.each((i, e) => {
+          e.cellIndex += e.parentHasTH ? 0 : 1;
+          e.textContent = [...e.td.children[0].childNodes]
+            .filter((i, e) => i.innerText != "")
+            .map((e) => e.data);
+        });
+
+        let dados = tabelCells.map((i, e) => {
+          let dadosFirstPos = e.textContent[0]
+            .split(" ")
+            .map((e) => e.split("-"))
+            .flat();
+          let subj = dadosFirstPos[0];
+          let crse = dadosFirstPos[1];
+          let crn = e.textContent[1].replace("Class", "").trim();
+
+          let time = e.textContent[2]; //3:30 pm-6:20 pm
+          let day = "";
+          switch (e.cellIndex) {
+            case 1:
+              day = "M";
+              break;
+            case 2:
+              day = "T";
+              break;
+            case 3:
+              day = "W";
+              break;
+            case 4:
+              day = "R";
+              break;
+            case 5:
+              day = "F";
+              break;
+            case 5:
+              day = "S";
+              break;
+          }
+
+          let location = e.textContent[3];
+          let location2 = location?.split(" ")[0];
+          let key = subj + crse + location2;
+          let name = getMyArrayCourseBackGroungColor(key, true);
+          return new Course(crse, crn, name, day, time, "", location, subj, "");
+        });
+
+        lblTimeTable.innerText = `Was found ${dados.length} courses`;
+        console.log(tabelCells);
+        dados.each((i,e) => {
+          e.borderColor = "red";
+          let eventAux = calendar.addEvent(e);
+          timeTableEventsCourse.push(eventAux);
+        });
+      },
+      data: {
+        start_date_in: new Date(inputDateTimeTable.value).toLocaleDateString(),
+      },
+    });
+  } else {
+    lblTimeTable.innerText = "MAKE SURE YOU SELECTED A VALID DATE";
+  }
+});
+
 const triggerEvent = (el, eventType, detail) =>
   el.dispatchEvent(new CustomEvent(eventType, { detail }));
 
 selectCourse.addEventListener("change", function (e) {
+  consoleLog(arguments);
   console.log($(e.target).find(":selected").val());
   let search = "";
   $(e.target)
@@ -74,14 +177,11 @@ selectCourse.addEventListener("change", function (e) {
   triggerEvent(txtFilterSelect, "keydown", { doNotChangeSelect: true });
 });
 
-//openPopupBtn.addEventListener("click", function () {
-//  popup.style.display = "block";
-//});
-var token = null;
 txtFilterSelect.addEventListener("keydown", function (e) {
+  consoleLog(arguments);
   localStorage.setItem("bannerQuarry", e.target.value);
-  if (token != null) clearTimeout(token);
-  token = setTimeout(() => {
+  if (tokenRefreshSearching != null) clearTimeout(tokenRefreshSearching);
+  tokenRefreshSearching = setTimeout(() => {
     //console.log(e);
 
     let regex = new RegExp(
@@ -104,32 +204,28 @@ txtFilterSelect.addEventListener("keydown", function (e) {
     }
     initializeOrUpdateCalendar(filterData);
     lblTimer.style.display = "none";
-  }, 2000);
+    lblRefreshColors.innerText = "";
+  }, 1000);
 
   lblTimer.style.display = "block";
 });
 
-var token2 = null;
-txtFilterLocation.addEventListener("keydown", function (e) {
-  if (token2 != null) clearTimeout(token2);
-  token2 = setTimeout(() => {
-    console.log(e);
-  }, 500);
-});
-
 closeBtn.addEventListener("click", function () {
+  consoleLog(arguments);
   popup.style.display = "none";
   localStorage.setItem("isWindowOpen", false);
 });
 
 // Optional: Close when clicking outside the popup
 window.addEventListener("click", function (event) {
+  consoleLog(arguments);
   if (event.target === popup) {
     popup.style.display = "none";
   }
 });
-let dataSource0 = null;
+
 function initializeOrUpdateCalendar(filterData) {
+  consoleLog(arguments);
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "timeGridWeek",
     headerToolbar: {
@@ -137,14 +233,29 @@ function initializeOrUpdateCalendar(filterData) {
       center: "",
       right: "",
     },
+    dayHeaderFormat: { weekday: "short" },
+    stickyHeaderDates: true,
+    stickyFooterScrollbar: true,
+    allDaySlot: false,
+    slotMinTime: "07:00:00",
+    slotMaxTime: "20:00:00",
     initialDate: Date.now(),
     events: Array.from(filterData),
+    eventClick: function (info) {
+      console.log("Event: " + info.event.title);
+      //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
+      //alert('View: ' + info.view.type);
+
+      // change the border color just for fun
+      info.el.style.borderColor = "red";
+    },
   });
 
   calendar.render();
 }
 
 function updateCourseOptionsOnSelecElement(filterData) {
+  consoleLog(arguments);
   let coursesItemsArray = Array.from(filterData);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
     return (
@@ -171,7 +282,8 @@ Date.prototype.addHours = function (h) {
   return this;
 };
 
-function getMyArrayCourseBackGRoungColor() {
+function getMyArrayCourseBackGroungColor(key, isGetNameValue) {
+  consoleLog(arguments);
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
@@ -181,27 +293,22 @@ function getMyArrayCourseBackGRoungColor() {
     JSON.stringify(myArrayCourseBackGRoungColor)
   );
 
-  return myArrayCourseBackGRoungColor;
+  return key
+    ? myArrayCourseBackGRoungColor[key]
+      ? isGetNameValue
+        ? myArrayCourseBackGRoungColor[key].name
+        : myArrayCourseBackGRoungColor[key].value
+      : null
+    : myArrayCourseBackGRoungColor;
 }
-function getMyArrayCourseBackGRoungColor(key) {
-  let myArrayCourseBackGRoungColor = JSON.parse(
-    localStorage.getItem("myArrayCourseBackGRoungColor")
-  );
-  if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
-  localStorage.setItem(
-    "myArrayCourseBackGRoungColor",
-    JSON.stringify(myArrayCourseBackGRoungColor)
-  );
-
-  return myArrayCourseBackGRoungColor[key];
-}
-function setMyArrayCourseBackGRoungColor(key, value) {
+function setMyArrayCourseBackGroungColor(key, value, name) {
+  consoleLog(arguments);
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
   if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
 
-  myArrayCourseBackGRoungColor[key] = value;
+  myArrayCourseBackGRoungColor[key] = { value: value, name: name };
 
   localStorage.setItem(
     "myArrayCourseBackGRoungColor",
@@ -209,103 +316,125 @@ function setMyArrayCourseBackGRoungColor(key, value) {
   );
 }
 
-function getColorToCourse(ee) {
-  let key = ee.location2 + ee.subj + ee.crse;
-  if (!getMyArrayCourseBackGRoungColor(key)) {
-    let newValue = Math.trunc(Math.random() * 360);
+class Course {
+  crse;
+  crn;
+  name;
+  day;
+  time;
+  instructor;
+  location;
+  subj;
+  cmp;
+  location;
+  location2;
+  key;
+  //the followinf properties will be used to the callendar component
+  backgroundColor;
+  title;
+  start;
+  end;
+  extendedProps;
+  constructor(crse, crn, name, day, time, instructor, location, subj, cmp) {
+    this.crse = crse;
+    this.crn = crn;
+    this.name = name;
+    this.day = day;
+    this.time = time;
+    this.instructor = instructor;
+    this.location = location;
+    this.subj = subj;
+    this.cmp = cmp;
 
-    //iterate on all properties of the object each represent each course code key,
-    //if there is any property with the new random value, it will generate new one,
-    // but it doesnt mean it wont generate a repeted one because there is 360 colocar
-    //to around 2000 differente courses. this is a flaw with minor impact.
-    for (let variable in getMyArrayCourseBackGRoungColor()) {
-      if (getMyArrayCourseBackGRoungColor(variable) == newValue) {
-        newValue = Math.trunc(Math.random() * 360);
-      }
-    }
-    setMyArrayCourseBackGRoungColor(key, newValue);
+    this.title =
+      this.crn + "\n" + this.crse + "\n" + this.name + "\n" + this.location;
+
+    this.location2 = this.location?.split(" ")[0];
+    this.title2 =
+      this.location2 +
+      " - " +
+      this.subj +
+      " - " +
+      this.crse +
+      " - " +
+      this.name;
+
+    this.key = this.subj + this.crse + this.location2;
+
+    this.generateBackGroundColorToCourse();
+
+    //this.backgroundColor = rgbColor;
+
+    let timeArray1 = this.time.split("-").map((e, i, l) => {
+      let timeArray2 = e.split(" ");
+      let lastSunday = this.getLastSunday();
+
+      let firstDayWeek = lastSunday.getDate();
+
+      let newDay = new Date(
+        lastSunday.getYear() + 1900,
+        lastSunday.getMonth(),
+        this.day == "M"
+          ? firstDayWeek + 1
+          : this.day == "T"
+          ? firstDayWeek + 2
+          : this.day == "W"
+          ? firstDayWeek + 3
+          : this.day == "R"
+          ? firstDayWeek + 4
+          : this.day == "F"
+          ? firstDayWeek + 5
+          : this.day == "S"
+          ? firstDayWeek + 6
+          : firstDayWeek,
+        parseInt(timeArray2[0].split(":")[0]),
+        parseInt(timeArray2[0].split(":")[1])
+      );
+
+      return timeArray2[1] == "pm" && timeArray2[0].split(":")[0] != "12"
+        ? newDay?.addHours(12)
+        : newDay;
+    });
+    this.start = timeArray1[0];
+    this.end = timeArray1[1];
   }
-  let rgbColor = `hsl(${getMyArrayCourseBackGRoungColor(key)},50%,50%)`;
-  // console.log(rgbColor);
-  return rgbColor;
+
+  getLastSunday() {
+    const date = new Date();
+    const today = date.getDate();
+    const currentDay = date.getDay();
+    const newDate = date.setDate(today - (currentDay || 7));
+    return new Date(newDate);
+  }
+
+  generateBackGroundColorToCourse(forceGenerateNewColor) {
+    if (!getMyArrayCourseBackGroungColor(this.key) || forceGenerateNewColor) {
+      let newValue = Math.trunc(Math.random() * 360);
+      setMyArrayCourseBackGroungColor(this.key, newValue, this.name);
+    }
+    let rgbColor = `hsl(${getMyArrayCourseBackGroungColor(this.key)},50%,50%)`;
+    this.backgroundColor = rgbColor;
+    return this.backgroundColor;
+  }
 }
 
-function getLastSunday() {
-  const date = new Date();
-  const today = date.getDate();
-  const currentDay = date.getDay();
-  const newDate = date.setDate(today - (currentDay || 7));
-  return new Date(newDate);
-}
 function loadData() {
+  consoleLog(arguments);
   if (!dataSource0) {
-    dataSource0 = $(
-      // ".datadisplaytable tr:contains('1112'), tr:contains('2003'), tr:contains('1008'), tr:contains('1054'), tr:contains('2017'), tr:contains('1006'):gt(1)"
-      ".datadisplaytable tr:has(td)"
-    )
+    dataSource0 = $(".datadisplaytable tr:has(td)")
+      .filter((i, e, list) => $(e).find("td:eq(1)").text().trim() != "")
       .map((l, e) => {
-        return {
-          crse: $(e).find("td:eq(3)").text().trim(),
-          crn: $(e).find("td:eq(1)").text().trim(),
-          name: $(e).find("td:eq(7)").text().trim(),
-          day: $(e).find("td:eq(8)").text().trim(),
-          time: $(e).find("td:eq(9)").text().trim(),
-          instructor: $(e).find("td:eq(13)").text().trim(),
-          location: $(e).find("td:eq(15)").text().trim(),
-
-          subj: $(e).find("td:eq(2)").text().trim(),
-          cmp: $(e).find("td:eq(5)").text().trim(),
-        };
-      })
-      .filter((i, item, list) => item.crn != "")
-      .map((l, ee) => {
-        ee.title =
-          ee.crn + "\n" + ee.crse + "\n" + ee.name + "\n" + ee.location;
-        ee.location2 = ee.location.split(" ")[0];
-        ee.title2 =
-          ee.location2 + " - " + ee.subj + " - " + ee.crse + " - " + ee.name;
-        ee.key = ee.subj + ee.crse + ee.location2;
-
-        //some improvements must be made about the color of each event in order to prevent different courses same color and make the student confuse
-
-        let rgbColor = getColorToCourse(ee);
-
-        ee.backgroundColor = rgbColor;
-
-        let timeArray1 = ee.time.split("-").map((e, i, l) => {
-          let timeArray2 = e.split(" ");
-          let firstDayWeek = getLastSunday().getDate();
-
-          let lastSunday = getLastSunday();
-
-          let newDay = new Date(
-            getLastSunday().getYear() + 1900,
-            getLastSunday().getMonth(),
-            ee.day == "M"
-              ? firstDayWeek + 1
-              : ee.day == "T"
-              ? firstDayWeek + 2
-              : ee.day == "W"
-              ? firstDayWeek + 3
-              : ee.day == "R"
-              ? firstDayWeek + 4
-              : ee.day == "F"
-              ? firstDayWeek + 5
-              : ee.day == "S"
-              ? firstDayWeek + 6
-              : firstDayWeek,
-            parseInt(timeArray2[0].split(":")[0]),
-            parseInt(timeArray2[0].split(":")[1])
-          );
-
-          return timeArray2[1] == "pm" && timeArray2[0].split(":")[0] != "12"
-            ? newDay?.addHours(12)
-            : newDay;
-        });
-        ee.start = timeArray1[0];
-        ee.end = timeArray1[1];
-
-        return ee;
+        return new Course(
+          $(e).find("td:eq(3)").text().trim(),
+          $(e).find("td:eq(1)").text().trim(),
+          $(e).find("td:eq(7)").text().trim(),
+          $(e).find("td:eq(8)").text().trim(),
+          $(e).find("td:eq(9)").text().trim(),
+          $(e).find("td:eq(13)").text().trim(),
+          $(e).find("td:eq(15)").text().trim(),
+          $(e).find("td:eq(2)").text().trim(),
+          $(e).find("td:eq(5)").text().trim()
+        );
       });
 
     if (calendarEl == null) {
@@ -319,27 +448,29 @@ function loadData() {
     updateCourseOptionsOnSelecElement(dataSource0);
 
     txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
-    triggerEvent(txtFilterSelect, "keydown", {  });
+    triggerEvent(txtFilterSelect, "keydown", {});
   }
 }
 
 //this timmer is just to make sure the jquery was loaded
-setTimeout(()=>{
-
+setTimeout(() => {
   $(document).ready(() => {
     if (localStorage.getItem("isWindowOpen") == "true") {
       popup.style.display = "block";
       loadData();
 
       txtFilterSelect.innerText = localStorage.getItem("bannerQuarry");
-    triggerEvent(txtFilterSelect, "keydown", {  });
+      triggerEvent(txtFilterSelect, "keydown", {});
     }
   });
-},1000)
-
-
-
+}, 1000);
+function consoleLog(arguments) {
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
+}
 btnLoadJQuery.onclick = () => {
+  //consoleLog(arguments);
   localStorage.setItem("isWindowOpen", true);
   popup.style.display = "block";
   loadData();
