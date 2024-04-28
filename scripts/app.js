@@ -30,7 +30,7 @@ let html = `
             If you want to load your current time table, please inform the date <input id="inputDateTimeTable" type="date"/> of semester's first week, then click <button id="btnLoadTimeTable">Load Time table</button> OR <button id="btnRemoveTimeTable">Remove Time Table</button><label id="lblTimeTable"></label>
             </div>
             <hr>
-            If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OR click over the course you want to change it's color.<label id="lblRefreshColors"></label>
+            If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OOR you can click over a especific course and changes only its color. <label id="lblRefreshColors"></label>
             <hr>
             <div>
               <label style="display:none"  id="lblTimer">Searching will begin in 2s...</label>
@@ -39,7 +39,6 @@ let html = `
     </div>
 </div>
 `;
-//<button id="open-popup">Open Popup</button>
 const newDiv = document.createElement("div");
 newDiv.innerHTML = html;
 
@@ -55,11 +54,13 @@ const btnRefreshColors = document.getElementById("btnRefreshColors");
 const lblTimeTable = document.getElementById("lblTimeTable");
 const lblRefreshColors = document.getElementById("lblRefreshColors");
 const btnRemoveTimeTable = document.getElementById("btnRemoveTimeTable");
-
 const popup = document.getElementById("popup");
 const closeBtn = document.querySelector(".close-btn");
+
 btnRefreshColors.addEventListener("click", function (e) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   lblRefreshColors.innerText = "Loading...";
   localStorage.setItem("myArrayCourseBackGRoungColor", null);
   dataSource0.each((a, b) => {
@@ -74,7 +75,9 @@ btnRemoveTimeTable.addEventListener("click", function (e) {
 });
 
 btnLoadTimeTable.addEventListener("click", function (e) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   lblTimeTable.innerText = "Loading...";
   if (inputDateTimeTable.value) {
     $.ajax({
@@ -145,7 +148,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
 
         lblTimeTable.innerText = `Was found ${dados.length} courses`;
         console.log(tabelCells);
-        dados.each((i,e) => {
+        dados.each((i, e) => {
           e.borderColor = "red";
           let eventAux = calendar.addEvent(e);
           timeTableEventsCourse.push(eventAux);
@@ -164,7 +167,9 @@ const triggerEvent = (el, eventType, detail) =>
   el.dispatchEvent(new CustomEvent(eventType, { detail }));
 
 selectCourse.addEventListener("change", function (e) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   console.log($(e.target).find(":selected").val());
   let search = "";
   $(e.target)
@@ -178,7 +183,9 @@ selectCourse.addEventListener("change", function (e) {
 });
 
 txtFilterSelect.addEventListener("keydown", function (e) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   localStorage.setItem("bannerQuarry", e.target.value);
   if (tokenRefreshSearching != null) clearTimeout(tokenRefreshSearching);
   tokenRefreshSearching = setTimeout(() => {
@@ -211,21 +218,47 @@ txtFilterSelect.addEventListener("keydown", function (e) {
 });
 
 closeBtn.addEventListener("click", function () {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   popup.style.display = "none";
   localStorage.setItem("isWindowOpen", false);
 });
 
 // Optional: Close when clicking outside the popup
 window.addEventListener("click", function (event) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   if (event.target === popup) {
     popup.style.display = "none";
   }
 });
+function clickOnEventOnCalendar(info) {
+  console.log("Event: " + info.event.title);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
+  lblRefreshColors.innerText = "Loading...";
+  let key=info.event.extendedProps.key;
+  //dataSource0.each((a, b) => {
+    //b.generateBackGroundColorToCourse();
+  //});
 
+    let newValue = Math.trunc(Math.random() * 360);
+    setMyArrayCourseBackGroungColor(key, newValue);
+
+
+  dataSource0.filter((i,e)=>e.key==info.event.extendedProps.key).each((i,e)=>e.generateBackGroundColorToCourse());
+
+  triggerEvent(txtFilterSelect, "keydown", {});
+
+
+}
 function initializeOrUpdateCalendar(filterData) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "timeGridWeek",
     headerToolbar: {
@@ -241,21 +274,16 @@ function initializeOrUpdateCalendar(filterData) {
     slotMaxTime: "20:00:00",
     initialDate: Date.now(),
     events: Array.from(filterData),
-    eventClick: function (info) {
-      console.log("Event: " + info.event.title);
-      //alert('Coordinates: ' + info.jsEvent.pageX + ',' + info.jsEvent.pageY);
-      //alert('View: ' + info.view.type);
-
-      // change the border color just for fun
-      info.el.style.borderColor = "red";
-    },
+    eventClick: clickOnEventOnCalendar,
   });
 
   calendar.render();
 }
 
 function updateCourseOptionsOnSelecElement(filterData) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   let coursesItemsArray = Array.from(filterData);
   var coursesItemsUnique = coursesItemsArray.filter(function (item, i, sites) {
     return (
@@ -283,7 +311,9 @@ Date.prototype.addHours = function (h) {
 };
 
 function getMyArrayCourseBackGroungColor(key, isGetNameValue) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
@@ -302,13 +332,15 @@ function getMyArrayCourseBackGroungColor(key, isGetNameValue) {
     : myArrayCourseBackGRoungColor;
 }
 function setMyArrayCourseBackGroungColor(key, value, name) {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
   if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
 
-  myArrayCourseBackGRoungColor[key] = { value: value, name: name };
+  myArrayCourseBackGRoungColor[key] = { value: value?value:myArrayCourseBackGRoungColor[key]?.value, name: name?name:myArrayCourseBackGRoungColor[key]?.name };
 
   localStorage.setItem(
     "myArrayCourseBackGRoungColor",
@@ -397,6 +429,8 @@ class Course {
     });
     this.start = timeArray1[0];
     this.end = timeArray1[1];
+
+    this.extendedProps={key:this.key};
   }
 
   getLastSunday() {
@@ -407,8 +441,8 @@ class Course {
     return new Date(newDate);
   }
 
-  generateBackGroundColorToCourse(forceGenerateNewColor) {
-    if (!getMyArrayCourseBackGroungColor(this.key) || forceGenerateNewColor) {
+  generateBackGroundColorToCourse() {
+    if (!getMyArrayCourseBackGroungColor(this.key) ) {
       let newValue = Math.trunc(Math.random() * 360);
       setMyArrayCourseBackGroungColor(this.key, newValue, this.name);
     }
@@ -419,7 +453,9 @@ class Course {
 }
 
 function loadData() {
-  consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   if (!dataSource0) {
     dataSource0 = $(".datadisplaytable tr:has(td)")
       .filter((i, e, list) => $(e).find("td:eq(1)").text().trim() != "")
@@ -470,7 +506,9 @@ function consoleLog(arguments) {
   );
 }
 btnLoadJQuery.onclick = () => {
-  //consoleLog(arguments);
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
   localStorage.setItem("isWindowOpen", true);
   popup.style.display = "block";
   loadData();
