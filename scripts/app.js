@@ -12,10 +12,12 @@ var tokenRefreshSearching = null;
 let dataSource0 = null;
 //=======
 let html = `
+
 <div id="popup" class="popup-container">
     <div class="popup-content">
         <span class="close-btn">&times;</span>
         <h2>The amazin Add'n Drop Filter</h2>
+        <h3>Disclaimer: this is not on Georigan College Oficial Extension. This is an Students initiative, the developer.</h3>
         <div>
             <label for="txtFilterSelect" >Inform Course</label>
             <textarea type="text" id="txtFilterSelect" ></textarea>
@@ -30,7 +32,7 @@ let html = `
             If you want to load your current time table, please inform the date <input id="inputDateTimeTable" type="date"/> of semester's first week, then click <button id="btnLoadTimeTable">Load Time table</button> OR <button id="btnRemoveTimeTable">Remove Time Table</button><label id="lblTimeTable"></label>
             </div>
             <hr>
-            If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OOR you can click over a especific course and changes only its color. <label id="lblRefreshColors"></label>
+            If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OR you can click over a especific course and changes only its color. <label id="lblRefreshColors"></label>
             <hr>
             <div>
               <label style="display:none"  id="lblTimer">Searching will begin in 2s...</label>
@@ -94,7 +96,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
                 )[0]
             )[0]
         ).find("td:has(a)");
-
+        processAllTableToKnowCellIndex2(linkWithContent[0].parentElement.parentElement.parentElement);
         let tabelCells = linkWithContent.map((i, e) => ({
           td: e,
           cellIndex: e.cellIndex,
@@ -102,6 +104,8 @@ btnLoadTimeTable.addEventListener("click", function (e) {
         }));
         tabelCells.each((i, e) => {
           e.cellIndex += e.parentHasTH ? 0 : 1;
+          //this property is being used instead e.cellIndex, because in the line 101 it is processing the new property that compensete some issues
+          e.td.dataset.cellIndexAux=  e.parentHasTH ? e.td.dataset.cellIndexAux :parseInt(e.td.dataset.cellIndexAux)+ 1;
           e.textContent = [...e.td.children[0].childNodes]
             .filter((i, e) => i.innerText != "")
             .map((e) => e.data);
@@ -118,7 +122,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
 
           let time = e.textContent[2]; //3:30 pm-6:20 pm
           let day = "";
-          switch (e.cellIndex) {
+          switch (parseInt( e.td.dataset.cellIndexAux)) {
             case 1:
               day = "M";
               break;
@@ -310,10 +314,16 @@ Date.prototype.addHours = function (h) {
   return this;
 };
 
+/**
+ * This method can return a single value or entire array if no value is passed on #key parameter 
+ * @param {*} key if this is null the method will return whole array
+ * @param {*} isGetNameValue 
+ * @returns 
+ */
 function getMyArrayCourseBackGroungColor(key, isGetNameValue) {
-  console.log(
-    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
-  );
+  //console.log(
+   // `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+ // );
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
@@ -437,7 +447,7 @@ class Course {
     const date = new Date();
     const today = date.getDate();
     const currentDay = date.getDay();
-    const newDate = date.setDate(today - (currentDay || 7));
+    const newDate = date.setDate(today - (currentDay));
     return new Date(newDate);
   }
 
@@ -450,6 +460,47 @@ class Course {
     this.backgroundColor = rgbColor;
     return this.backgroundColor;
   }
+}
+function processAllTableToKnowCellIndex2(table) {
+  $("td", table)
+    .map((_, e) => {
+      e.dataset.cellIndexAux = parseInt(e.cellIndex);
+      //e.innerText = e.dataset.cellIndexAux;
+      return e;
+    })
+    .filter((_, e) => e.rowSpan > 1)
+    .each((_, e) => {
+      let cellWithSpan = e;
+      let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
+      let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
+      let rowWithCellWithSpan = cellWithSpan.parentElement;
+      let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
+      //loop on each row effeted
+      for (
+        let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
+        i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
+        i++
+      ) {
+        let nextRow = table.rows[i];
+        let cellsInThisRow = nextRow.children;
+        let totalTDCellsInThisRow = cellsInThisRow.length;
+        //nextRow.style.color = "red";
+        //iterate on all cells on the row
+        for (let j = 0; j < totalTDCellsInThisRow; j++) {
+          let cellToIterate = cellsInThisRow[j];
+
+          //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
+          cellToIterate.dataset.cellIndexAux =
+            parseInt(cellToIterate.dataset.cellIndexAux) >=
+            indexCellWithSpan
+              ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
+              : parseInt(cellToIterate.dataset.cellIndexAux);
+          //cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
+        }
+      }
+    });
+
+    
 }
 
 function loadData() {

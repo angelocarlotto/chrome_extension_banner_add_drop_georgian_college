@@ -1,0 +1,201 @@
+<html>
+  <head>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <title>=]</title>
+  </head>
+  <body>
+    <table border="1">
+      <thead>
+        <tr id="tr0">
+          <th>12pm</th>
+          <th>a</th>
+          <th>b</th>
+          <th>c</th>
+          <th>d</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="tr1">
+          <th rowspan="4">12am</th>
+          <td id="td1x0">0</td>
+          <td id="td1x2">2</td>
+          <td id="td1x1" rowspan="3" id="tdItem1">1</td>
+          <td id="td1x3">3</td>
+        </tr>
+        <tr id="tr3">
+          <td id="td2x0">0</td>
+          <td id="td2x1">1</td>
+          <td id="td2x2">2</td>
+        </tr>
+        <tr id="tr3">
+          <td id="td3x0">0</td>
+          <td id="td3x1">1</td>
+          <td id="td3x2">2</td>
+        </tr>
+        <tr id="tr4">
+          <td id="td4x0" rowspan="2">0</td>
+          <td id="td4x1">1</td>
+          <td id="td4x2">2</td>
+          <td id="td4x3">3</td>
+        </tr>
+        <tr id="tr5">
+          <th rowspan="5">12pm</th>
+          <td id="td5x0">1</td>
+          <td id="td5x1" rowspan="2">2</td>
+          <td id="td5x2">3</td>
+        </tr>
+        <tr id="tr6">
+          <td id="td6x0">0</td>
+          <td id="td6x1">0</td>
+          <td id="td6x2">1</td>
+        </tr>
+
+        <tr id="tr7">
+          <td id="td7x0">0</td>
+          <td id="td7x1">1</td>
+          <td id="td7x2">2</td>
+          <td id="td7x3">3</td>
+        </tr>
+        <tr id="tr8">
+          <td id="td8x0" rowspan="2">0</td>
+          <td id="td8x1">1</td>
+          <td id="td8x2" rowspan="2">2</td>
+          <td id="td8x3">3</td>
+        </tr>
+        <tr id="tr9">
+          <td id="td9x0">0</td>
+          <td id="td9x1">1</td>
+        </tr>
+      </tbody>
+    </table>
+    <script type="text/javascript" blocking="render">
+      /*
+      $("table  td")
+        .map((_, e) => {
+          e.dataset.cellIndexAux = parseInt(e.cellIndex);
+          e.innerText = e.dataset.cellIndexAux;
+          return e;
+        })
+        .filter((_, e) => e.rowSpan > 1)
+        .each((_, e) => {
+          let cellWithSpan = e;
+          let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
+          let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
+          let rowWithCellWithSpan = cellWithSpan.parentElement;
+          let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
+          //loop on each row effeted
+          for (
+            let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
+            i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
+            i++
+          ) {
+
+            let nextRow = $("table tr")[i];
+            let cellsInThisRow = nextRow.children;
+            let totalTDCellsInThisRow = cellsInThisRow.length;
+            nextRow.style.color = "red";
+            //iterate on all cells on the row
+            for (let j = 0; j < totalTDCellsInThisRow; j++) {
+              let cellToIterate = cellsInThisRow[j];
+
+              //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
+              cellToIterate.dataset.cellIndexAux =
+                parseInt(cellToIterate.dataset.cellIndexAux) >=
+                indexCellWithSpan
+                  ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
+                  : parseInt(cellToIterate.dataset.cellIndexAux);
+
+              cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
+            }
+          }
+        });
+        */
+
+      function processAllTableToKnowCellIndex(td) {
+        $("td", td.offsetParent)
+          .map((_, e) => {
+            e.dataset.cellIndexAux = parseInt(e.cellIndex);
+            e.innerText = e.dataset.cellIndexAux;
+            return e;
+          })
+          .filter((_, e) => e.rowSpan > 1)
+          .each((_, e) => {
+            let cellWithSpan = e;
+            let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
+            let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
+            let rowWithCellWithSpan = cellWithSpan.parentElement;
+            let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
+            //loop on each row effeted
+            for (
+              let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
+              i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
+              i++
+            ) {
+              let nextRow = td.offsetParent.rows[i];
+              let cellsInThisRow = nextRow.children;
+              let totalTDCellsInThisRow = cellsInThisRow.length;
+              nextRow.style.color = "red";
+              //iterate on all cells on the row
+              for (let j = 0; j < totalTDCellsInThisRow; j++) {
+                let cellToIterate = cellsInThisRow[j];
+
+                //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
+                cellToIterate.dataset.cellIndexAux =
+                  parseInt(cellToIterate.dataset.cellIndexAux) >=
+                  indexCellWithSpan
+                    ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
+                    : parseInt(cellToIterate.dataset.cellIndexAux);
+                cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
+              }
+            }
+          });
+      }
+
+      function processAllTableToKnowCellIndex2(table) {
+        $("td", table)
+          .map((_, e) => {
+            e.dataset.cellIndexAux = parseInt(e.cellIndex);
+            e.innerText = e.dataset.cellIndexAux;
+            return e;
+          })
+          .filter((_, e) => e.rowSpan > 1)
+          .each((_, e) => {
+            let cellWithSpan = e;
+            let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
+            let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
+            let rowWithCellWithSpan = cellWithSpan.parentElement;
+            let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
+            //loop on each row effeted
+            for (
+              let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
+              i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
+              i++
+            ) {
+              let nextRow = table.rows[i];
+              let cellsInThisRow = nextRow.children;
+              let totalTDCellsInThisRow = cellsInThisRow.length;
+              nextRow.style.color = "red";
+              //iterate on all cells on the row
+              for (let j = 0; j < totalTDCellsInThisRow; j++) {
+                let cellToIterate = cellsInThisRow[j];
+
+                //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
+                cellToIterate.dataset.cellIndexAux =
+                  parseInt(cellToIterate.dataset.cellIndexAux) >=
+                  indexCellWithSpan
+                    ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
+                    : parseInt(cellToIterate.dataset.cellIndexAux);
+                cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
+              }
+            }
+          });
+      }
+      processAllTableToKnowCellIndex2($("table")[0]);
+      console.log($("table td")[9]);
+    </script>
+  </body>
+</html>
