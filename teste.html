@@ -73,90 +73,9 @@
       </tbody>
     </table>
     <script type="text/javascript" blocking="render">
-      /*
-      $("table  td")
-        .map((_, e) => {
-          e.dataset.cellIndexAux = parseInt(e.cellIndex);
-          e.innerText = e.dataset.cellIndexAux;
-          return e;
-        })
-        .filter((_, e) => e.rowSpan > 1)
-        .each((_, e) => {
-          let cellWithSpan = e;
-          let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
-          let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
-          let rowWithCellWithSpan = cellWithSpan.parentElement;
-          let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
-          //loop on each row effeted
-          for (
-            let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
-            i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
-            i++
-          ) {
-
-            let nextRow = $("table tr")[i];
-            let cellsInThisRow = nextRow.children;
-            let totalTDCellsInThisRow = cellsInThisRow.length;
-            nextRow.style.color = "red";
-            //iterate on all cells on the row
-            for (let j = 0; j < totalTDCellsInThisRow; j++) {
-              let cellToIterate = cellsInThisRow[j];
-
-              //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
-              cellToIterate.dataset.cellIndexAux =
-                parseInt(cellToIterate.dataset.cellIndexAux) >=
-                indexCellWithSpan
-                  ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
-                  : parseInt(cellToIterate.dataset.cellIndexAux);
-
-              cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
-            }
-          }
-        });
-        */
-
-      function processAllTableToKnowCellIndex(td) {
-        $("td", td.offsetParent)
-          .map((_, e) => {
-            e.dataset.cellIndexAux = parseInt(e.cellIndex);
-            e.innerText = e.dataset.cellIndexAux;
-            return e;
-          })
-          .filter((_, e) => e.rowSpan > 1)
-          .each((_, e) => {
-            let cellWithSpan = e;
-            let indexCellWithSpan = parseInt(cellWithSpan.dataset.cellIndexAux);
-            let numberOfRowsEffectedBelow = cellWithSpan.rowSpan - 1; //number of effected rows below of the current row
-            let rowWithCellWithSpan = cellWithSpan.parentElement;
-            let indexRowWithCellWithSpan = rowWithCellWithSpan.rowIndex;
-            //loop on each row effeted
-            for (
-              let i = indexRowWithCellWithSpan + 1; //start at the index of the row plus skip the row with rowspan it self with +1
-              i < indexRowWithCellWithSpan + 1 + numberOfRowsEffectedBelow; //the loop goes until the i value is less then the starting row index plus the number of rows effected
-              i++
-            ) {
-              let nextRow = td.offsetParent.rows[i];
-              let cellsInThisRow = nextRow.children;
-              let totalTDCellsInThisRow = cellsInThisRow.length;
-              nextRow.style.color = "red";
-              //iterate on all cells on the row
-              for (let j = 0; j < totalTDCellsInThisRow; j++) {
-                let cellToIterate = cellsInThisRow[j];
-
-                //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
-                cellToIterate.dataset.cellIndexAux =
-                  parseInt(cellToIterate.dataset.cellIndexAux) >=
-                  indexCellWithSpan
-                    ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
-                    : parseInt(cellToIterate.dataset.cellIndexAux);
-                cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
-              }
-            }
-          });
-      }
-
+     
       function processAllTableToKnowCellIndex2(table) {
-        $("td", table)
+        $("td,th", table)
           .map((_, e) => {
             e.dataset.cellIndexAux = parseInt(e.cellIndex);
             e.innerText = e.dataset.cellIndexAux;

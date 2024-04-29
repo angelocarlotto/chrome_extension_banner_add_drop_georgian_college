@@ -103,9 +103,6 @@ btnLoadTimeTable.addEventListener("click", function (e) {
           parentHasTH: $(e.parentElement.children).filter("th").length,
         }));
         tabelCells.each((i, e) => {
-          e.cellIndex += e.parentHasTH ? 0 : 1;
-          //this property is being used instead e.cellIndex, because in the line 101 it is processing the new property that compensete some issues
-          e.td.dataset.cellIndexAux=  e.parentHasTH ? e.td.dataset.cellIndexAux :parseInt(e.td.dataset.cellIndexAux)+ 1;
           e.textContent = [...e.td.children[0].childNodes]
             .filter((i, e) => i.innerText != "")
             .map((e) => e.data);
@@ -462,7 +459,7 @@ class Course {
   }
 }
 function processAllTableToKnowCellIndex2(table) {
-  $("td", table)
+  $("td,th", table)
     .map((_, e) => {
       e.dataset.cellIndexAux = parseInt(e.cellIndex);
       //e.innerText = e.dataset.cellIndexAux;
