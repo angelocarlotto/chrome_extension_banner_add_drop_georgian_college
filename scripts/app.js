@@ -97,7 +97,9 @@ btnLoadTimeTable.addEventListener("click", function (e) {
                 )[0]
             )[0]
         ).find("td:has(a)");
-        processAllTableToKnowCellIndex2(linkWithContent[0].parentElement.parentElement.parentElement);
+        processAllTableToKnowCellIndex2(
+          linkWithContent[0].parentElement.parentElement.parentElement
+        );
         let tabelCells = linkWithContent.map((i, e) => ({
           td: e,
           cellIndex: e.cellIndex,
@@ -120,7 +122,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
 
           let time = e.textContent[2]; //3:30 pm-6:20 pm
           let day = "";
-          switch (parseInt( e.td.dataset.cellIndexAux)) {
+          switch (parseInt(e.td.dataset.cellIndexAux)) {
             case 1:
               day = "M";
               break;
@@ -212,12 +214,15 @@ txtFilterSelect.addEventListener("keydown", function (e) {
       updateCourseOptionsOnSelecElement(filterData);
     }
     initializeOrUpdateCalendar(filterData);
-    if(timeTableEventsCourse.filter((_,e)=>  calendar.getEventById(e.id)).length==0){
-      initializeOrUpdateCalendar([...filterData,...timeTableEventsCourse]);
-    }else{
+    if (
+      timeTableEventsCourse.filter((_, e) => calendar.getEventById(e.id))
+        .length == 0
+    ) {
+      initializeOrUpdateCalendar([...filterData, ...timeTableEventsCourse]);
+    } else {
       initializeOrUpdateCalendar([...filterData]);
     }
-    
+
     lblTimer.style.display = "none";
     lblRefreshColors.innerText = "";
   }, 1000);
@@ -243,7 +248,9 @@ window.addEventListener("click", function (event) {
   }
 });
 function cleantimeTableEventsCourse() {
-  timeTableEventsCourse.forEach((a, b, c) => calendar.getEventById(a.id).remove());
+  timeTableEventsCourse.forEach((a, b, c) =>
+    calendar.getEventById(a.id).remove()
+  );
   timeTableEventsCourse = [];
 }
 
@@ -252,21 +259,22 @@ function clickOnEventOnCalendar(info) {
     `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
   );
   lblRefreshColors.innerText = "Loading...";
-  let key=info.event.extendedProps.key;
+  let key = info.event.extendedProps.key;
   //dataSource0.each((a, b) => {
-    //b.generateBackGroundColorToCourse();
+  //b.generateBackGroundColorToCourse();
   //});
 
-    let newValue = Math.trunc(Math.random() * 360);
-    setMyArrayCourseBackGroungColor(key, newValue);
+  let newValue = Math.trunc(Math.random() * 360);
+  setMyArrayCourseBackGroungColor(key, newValue);
 
-
-  dataSource0.filter((i,e)=>e.key==info.event.extendedProps.key).each((i,e)=>e.generateBackGroundColorToCourse());
-  timeTableEventsCourse.filter((e)=>e.key==info.event.extendedProps.key).forEach((e)=>e.generateBackGroundColorToCourse());
+  dataSource0
+    .filter((i, e) => e.key == info.event.extendedProps.key)
+    .each((i, e) => e.generateBackGroundColorToCourse());
+  timeTableEventsCourse
+    .filter((e) => e.key == info.event.extendedProps.key)
+    .forEach((e) => e.generateBackGroundColorToCourse());
 
   triggerEvent(txtFilterSelect, "keydown", {});
-
-
 }
 function initializeOrUpdateCalendar(filterData) {
   console.log(
@@ -324,23 +332,25 @@ Date.prototype.addHours = function (h) {
 };
 
 /**
- * This method can return a single value or entire array if no value is passed on #key parameter 
+ * This method can return a single value or entire array if no value is passed on #key parameter
  * @param {*} key if this is null the method will return whole array
- * @param {*} isGetNameValue 
- * @returns 
+ * @param {*} isGetNameValue
+ * @returns
  */
 function getMyArrayCourseBackGroungColor(key, isGetNameValue) {
   //console.log(
-   // `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
- // );
+  // `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  // );
   let myArrayCourseBackGRoungColor = JSON.parse(
     localStorage.getItem("myArrayCourseBackGRoungColor")
   );
-  if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
-  localStorage.setItem(
-    "myArrayCourseBackGRoungColor",
-    JSON.stringify(myArrayCourseBackGRoungColor)
-  );
+  if (myArrayCourseBackGRoungColor == null) {
+    myArrayCourseBackGRoungColor = {};
+    localStorage.setItem(
+      "myArrayCourseBackGRoungColor",
+      JSON.stringify(myArrayCourseBackGRoungColor)
+    );
+  }
 
   return key
     ? myArrayCourseBackGRoungColor[key]
@@ -359,7 +369,10 @@ function setMyArrayCourseBackGroungColor(key, value, name) {
   );
   if (myArrayCourseBackGRoungColor == null) myArrayCourseBackGRoungColor = {};
 
-  myArrayCourseBackGRoungColor[key] = { value: value?value:myArrayCourseBackGRoungColor[key]?.value, name: name?name:myArrayCourseBackGRoungColor[key]?.name };
+  myArrayCourseBackGRoungColor[key] = {
+    value: value ? value : myArrayCourseBackGRoungColor[key]?.value,
+    name: name ? name : myArrayCourseBackGRoungColor[key]?.name,
+  };
 
   localStorage.setItem(
     "myArrayCourseBackGRoungColor",
@@ -388,7 +401,7 @@ class Course {
   extendedProps;
   id;
   constructor(crse, crn, name, day, time, instructor, location, subj, cmp) {
-    this.id=this.uniqueId();
+    this.id = this.uniqueId();
     this.crse = crse;
     this.crn = crn;
     this.name = name;
@@ -415,8 +428,6 @@ class Course {
     this.key = this.subj + this.crse + this.location2;
 
     this.generateBackGroundColorToCourse();
-
-    //this.backgroundColor = rgbColor;
 
     let timeArray1 = this.time.split("-").map((e, i, l) => {
       let timeArray2 = e.split(" ");
@@ -450,10 +461,8 @@ class Course {
     });
     this.start = timeArray1[0];
     this.end = timeArray1[1];
-
-    //this.extendedProps={key:this.key};
   }
-   uniqueId = () => {
+  uniqueId = () => {
     const dateString = Date.now().toString(36);
     const randomness = Math.random().toString(36).substr(2);
     return dateString + randomness;
@@ -462,12 +471,12 @@ class Course {
     const date = new Date();
     const today = date.getDate();
     const currentDay = date.getDay();
-    const newDate = date.setDate(today - (currentDay));
+    const newDate = date.setDate(today - currentDay);
     return new Date(newDate);
   }
 
   generateBackGroundColorToCourse() {
-    if (!getMyArrayCourseBackGroungColor(this.key) ) {
+    if (!getMyArrayCourseBackGroungColor(this.key)) {
       let newValue = Math.trunc(Math.random() * 360);
       setMyArrayCourseBackGroungColor(this.key, newValue, this.name);
     }
@@ -506,16 +515,13 @@ function processAllTableToKnowCellIndex2(table) {
 
           //change the index only of those cells whose  cellIndex is grater or equal do the previous cellIndex
           cellToIterate.dataset.cellIndexAux =
-            parseInt(cellToIterate.dataset.cellIndexAux) >=
-            indexCellWithSpan
+            parseInt(cellToIterate.dataset.cellIndexAux) >= indexCellWithSpan
               ? parseInt(cellToIterate.dataset.cellIndexAux) + 1
               : parseInt(cellToIterate.dataset.cellIndexAux);
           //cellToIterate.innerText = cellToIterate.dataset.cellIndexAux;
         }
       }
     });
-
-    
 }
 
 function loadData() {
@@ -566,15 +572,7 @@ setTimeout(() => {
     }
   });
 }, 1000);
-function consoleLog(arguments) {
-  console.log(
-    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
-  );
-}
 btnLoadJQuery.onclick = () => {
-  console.log(
-    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
-  );
   localStorage.setItem("isWindowOpen", true);
   popup.style.display = "block";
   loadData();
