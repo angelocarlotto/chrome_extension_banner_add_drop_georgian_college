@@ -17,7 +17,7 @@ let html = `
     <div class="popup-content">
         <span class="close-btn">&times;</span>
         <h2>The amazin Add'n Drop Filter</h2>
-        <h3>Disclaimer: this is not on Georigan College Oficial Extension. This is an Students initiative, the developer.</h3>
+        <div><strong>Disclaimer</strong>: this is not on Georigan College Oficial Extension. This is an Students initiative, the developer.</div>
         <div>
             <label for="txtFilterSelect" >Inform Course</label>
             <textarea type="text" id="txtFilterSelect" ></textarea>
@@ -73,7 +73,7 @@ btnRefreshColors.addEventListener("click", function (e) {
 });
 
 btnRemoveTimeTable.addEventListener("click", function (e) {
-  timeTableEventsCourse.forEach((a, b, c) => a.remove());
+  cleantimeTableEventsCourse();
 });
 
 btnLoadTimeTable.addEventListener("click", function (e) {
@@ -85,7 +85,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
     $.ajax({
       url: "https://sis-ssb.georgiancollege.ca:9110/GEOR/bwskfshd.P_CrseSchd",
       success: (responseAux, b) => {
-        timeTableEventsCourse.forEach((a, b, c) => a.remove());
+        cleantimeTableEventsCourse();
         let linkWithContent = $(
           $(responseAux)
             .filter("div.headerwrapperdiv")
@@ -151,8 +151,8 @@ btnLoadTimeTable.addEventListener("click", function (e) {
         console.log(tabelCells);
         dados.each((i, e) => {
           e.borderColor = "red";
-          let eventAux = calendar.addEvent(e);
-          timeTableEventsCourse.push(eventAux);
+          calendar.addEvent(e);
+          timeTableEventsCourse.push(e);
         });
       },
       data: {
@@ -211,6 +211,12 @@ txtFilterSelect.addEventListener("keydown", function (e) {
       updateCourseOptionsOnSelecElement(filterData);
     }
     initializeOrUpdateCalendar(filterData);
+    if(timeTableEventsCourse.filter((_,e)=>  calendar.getEventById(e.id)).length==0){
+      initializeOrUpdateCalendar([...filterData,...timeTableEventsCourse]);
+    }else{
+      initializeOrUpdateCalendar([...filterData]);
+    }
+    
     lblTimer.style.display = "none";
     lblRefreshColors.innerText = "";
   }, 1000);
@@ -235,8 +241,12 @@ window.addEventListener("click", function (event) {
     popup.style.display = "none";
   }
 });
+function cleantimeTableEventsCourse() {
+  timeTableEventsCourse.forEach((a, b, c) => calendar.getEventById(a.id).remove());
+  timeTableEventsCourse = [];
+}
+
 function clickOnEventOnCalendar(info) {
-  console.log("Event: " + info.event.title);
   console.log(
     `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
   );
@@ -251,6 +261,7 @@ function clickOnEventOnCalendar(info) {
 
 
   dataSource0.filter((i,e)=>e.key==info.event.extendedProps.key).each((i,e)=>e.generateBackGroundColorToCourse());
+  timeTableEventsCourse.filter((e)=>e.key==info.event.extendedProps.key).forEach((e)=>e.generateBackGroundColorToCourse());
 
   triggerEvent(txtFilterSelect, "keydown", {});
 
@@ -374,7 +385,9 @@ class Course {
   start;
   end;
   extendedProps;
+  id;
   constructor(crse, crn, name, day, time, instructor, location, subj, cmp) {
+    this.id=this.uniqueId();
     this.crse = crse;
     this.crn = crn;
     this.name = name;
@@ -437,9 +450,13 @@ class Course {
     this.start = timeArray1[0];
     this.end = timeArray1[1];
 
-    this.extendedProps={key:this.key};
+    //this.extendedProps={key:this.key};
   }
-
+   uniqueId = () => {
+    const dateString = Date.now().toString(36);
+    const randomness = Math.random().toString(36).substr(2);
+    return dateString + randomness;
+  };
   getLastSunday() {
     const date = new Date();
     const today = date.getDate();
