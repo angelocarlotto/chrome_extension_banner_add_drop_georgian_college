@@ -16,8 +16,9 @@ let html = `
 <div id="popup" class="popup-container">
     <div class="popup-content">
         <span class="close-btn">&times;</span>
-        <h2>The amazin Add'n Drop Filter</h2>
-        <div><strong>Disclaimer</strong>: this is not on Georigan College Oficial Extension. This is an Students initiative, the developer.</div>
+        <h2>The amazing Add'n Drop Filter</h2>
+        <div><strong>Disclaimer</strong>: this is not an Oficial Georigan College Chrome Extension. This is an Students initiative, the developer. Any problem please email: angelocarlotto@gmail.com</div>
+        <hr>
         <div>
             <label for="txtFilterSelect" >Inform Course</label>
             <textarea type="text" id="txtFilterSelect" ></textarea>
