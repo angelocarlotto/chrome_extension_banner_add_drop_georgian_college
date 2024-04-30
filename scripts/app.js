@@ -20,8 +20,12 @@ let html = `
         <div><strong>Disclaimer</strong>: this is not an Oficial Georigan College Chrome Extension. This is an Students initiative, the developer. Any problem please email: angelocarlotto@gmail.com</div>
         <hr>
         <div>
-            <label for="txtFilterSelect" >Inform Course</label>
+            <label for="txtFilterSelect" >Search/Regular Expression</label>
             <textarea type="text" id="txtFilterSelect" ></textarea>
+            <div ><label>Sample of search:</label> "LT_GC.*COMP.*(1112|2003|1008|1006|1054)|LT_GC.*COMM.*2017"</div>
+            <div ><label>Explaning:</label> This search will show me only the courses hosted on (LT_GC location, COMP) and whose course code is (1112 or 2003 or 1008 or 10006 or 1054) OR the course hosted on (LT_GC, COMM, and  whose course code is 2017) </div>
+            <p><label>Disclaimer</label> To this example search work better, or any search, to you have a better experience with this extension, on the previou page(search page), keep all filter empty, so this way you will have access on all available courses at the moment, so your seach will be easier, will take little longer, but will work better.</p>
+            
             <br>
             <label for="selectCourse">Select Course</label>
             <select id="selectCourse" multiple>
@@ -30,7 +34,7 @@ let html = `
             
             <hr>
             <div id="divTimeTable">
-            If you want to load your current time table, please inform the date <input id="inputDateTimeTable" type="date"/> of semester's first week, then click <button id="btnLoadTimeTable">Load Time table</button> OR <button id="btnRemoveTimeTable">Remove Time Table</button><label id="lblTimeTable"></label>
+            If you want to load your current time table, please inform the date <input id="inputDateTimeTable" type="date" /> of semester's first week, then click <button id="btnLoadTimeTable">Load Time table</button> OR <button id="btnRemoveTimeTable">Remove Time Table</button><label id="lblTimeTable"></label>
             </div>
             <hr>
             If the colors of each Course is confused try <button id="btnRefreshColors">Refresh Colors</button> OR you can click over a especific course and changes only its color. <label id="lblRefreshColors"></label>
@@ -237,7 +241,7 @@ closeBtn.addEventListener("click", function () {
   popup.style.display = "none";
   localStorage.setItem("isWindowOpen", false);
 });
-
+/*
 // Optional: Close when clicking outside the popup
 window.addEventListener("click", function (event) {
   console.log(
@@ -247,6 +251,7 @@ window.addEventListener("click", function (event) {
     popup.style.display = "none";
   }
 });
+*/
 function cleantimeTableEventsCourse() {
   timeTableEventsCourse.forEach((a, b, c) =>
     calendar.getEventById(a.id).remove()
@@ -393,6 +398,7 @@ class Course {
   location;
   location2;
   key;
+  rem;
   //the followinf properties will be used to the callendar component
   backgroundColor;
   title;
@@ -400,7 +406,18 @@ class Course {
   end;
   extendedProps;
   id;
-  constructor(crse, crn, name, day, time, instructor, location, subj, cmp) {
+  constructor(
+    crse,
+    crn,
+    name,
+    day,
+    time,
+    instructor,
+    location,
+    subj,
+    cmp,
+    rem
+  ) {
     this.id = this.uniqueId();
     this.crse = crse;
     this.crn = crn;
@@ -411,9 +428,9 @@ class Course {
     this.location = location;
     this.subj = subj;
     this.cmp = cmp;
-
-    this.title =
-      this.crn + "\n" + this.crse + "\n" + this.name + "\n" + this.location;
+    this.rem = rem;
+    this.title = `${this.crn} \n ${this.crse} \n  ${this.name} \n ${this.location} \n Rem:${this.rem>0?this.rem:"--"}`;
+    //this.crn + "\n" + this.crse + "\n" + this.name + "\n" + this.location;
 
     this.location2 = this.location?.split(" ")[0];
     this.title2 =
@@ -541,7 +558,8 @@ function loadData() {
           $(e).find("td:eq(13)").text().trim(),
           $(e).find("td:eq(15)").text().trim(),
           $(e).find("td:eq(2)").text().trim(),
-          $(e).find("td:eq(5)").text().trim()
+          $(e).find("td:eq(5)").text().trim(),
+          $(e).find("td:eq(12)").text().trim()
         );
       });
 
