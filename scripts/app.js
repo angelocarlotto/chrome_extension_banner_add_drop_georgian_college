@@ -102,7 +102,7 @@ btnLoadTimeTable.addEventListener("click", function (e) {
             )[0]
         ).find("td:has(a)");
         processAllTableToKnowCellIndex2(
-          linkWithContent[0].parentElement.parentElement.parentElement
+          linkWithContent[0]?.parentElement.parentElement.parentElement
         );
         let tabelCells = linkWithContent.map((i, e) => ({
           td: e,
@@ -189,8 +189,14 @@ selectCourse.addEventListener("change", function (e) {
   txtFilterSelect.value = search; // $(e.target).val().join(" ");
   triggerEvent(txtFilterSelect, "keydown", { doNotChangeSelect: true });
 });
+txtFilterSelect.onchange=function (e) {
+  console.log(
+    `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
+  );
+  localStorage.setItem("bannerQuarry", e.target.value);
+};
 
-txtFilterSelect.addEventListener("keydown", function (e) {
+txtFilterSelect.onkeydown=function (e) {
   console.log(
     `Entered: ${arguments.callee.name} ${arguments[0]?.currentTarget?.id} ${arguments[0]?.type}`
   );
@@ -232,7 +238,8 @@ txtFilterSelect.addEventListener("keydown", function (e) {
   }, 1000);
 
   lblTimer.style.display = "block";
-});
+}
+
 
 closeBtn.addEventListener("click", function () {
   console.log(
@@ -299,6 +306,7 @@ function initializeOrUpdateCalendar(filterData) {
     slotMinTime: "07:00:00",
     slotMaxTime: "20:00:00",
     initialDate: Date.now(),
+    aspectRatio: 2,
     events: Array.from(filterData),
     eventClick: clickOnEventOnCalendar,
   });
